@@ -1,0 +1,221 @@
+That’s fine—let’s proceed with your FULLSTACK_JS (React + Express) stack.
+
+Please implement the exact UI/UX and features from my spec, keeping everything portable to Next.js later. Use React Router for pages, and keep server usage minimal (only as a placeholder API). Supabase auth/storage should be optional via env; if envs are missing, fall back to local mocks.
+
+────────────────────────────────────────────────
+PROJECT SHAPE
+────────────────────────────────────────────────
+• React + TypeScript + Vite (if available) or your default bundler
+• Tailwind + shadcn/ui + lucide-react
+• React Router (App routes)
+• Zustand (state), Zod (validation)
+• Supabase JS client (optional; mock if no env)
+• Playwright (1–2 smoke tests)
+• ESLint + Prettier, strict TS
+
+File layout:
+- /client
+  - src/
+    - app/
+      - routes.tsx (Router)
+      - pages/
+        - Home.tsx
+        - Gallery.tsx
+        - Tool.tsx        // /t/:id
+        - Settings.tsx
+        - About.tsx
+        - NotFound.tsx
+      - layout/
+        - TopBar.tsx
+        - LeftRail.tsx
+        - MainCard.tsx
+        - BottomDock.tsx
+        - Breadcrumbs.tsx
+        - CommandPalette.tsx
+      - tool/
+        - ToolRunner.tsx
+        - Dropzone.tsx
+        - Slider.tsx
+        - Switch.tsx
+        - OutputList.tsx
+        - ProgressBar.tsx
+      - gallery/
+        - GalleryToolbar.tsx
+        - GalleryGrid.tsx
+        - GalleryCard.tsx
+      - ui/
+        - Skeleton.tsx
+        - EmptyState.tsx
+        - ToastProvider.tsx
+    - themes/
+      - types.ts
+      - index.ts         // theme registry (3 themes)
+      - ThemeProvider.tsx
+      - ThemeSwitcher.tsx
+    - lib/
+      - fastlane.ts      // regex → canned ToolSpecs (no LLM)
+      - seeds.ts         // gallery + ranking seeds
+      - keyboard.ts
+      - useDockPadding.ts
+      - supabaseClient.ts
+    - store/
+      - useUIStore.ts    // rail collapse, theme, composer dock
+      - useAuthStore.ts
+      - useRecentStore.ts
+    - assets/ (icons, tiny fixtures)
+  - index.html
+- /server
+  - index.ts (Express) – health, placeholder routes only
+
+Build with absolute imports via tsconfig paths for easy Next.js migration later.
+
+────────────────────────────────────────────────
+VISUAL STYLE (match the pastel reference)
+────────────────────────────────────────────────
+Global:
+• Page background = soft diagonal gradient (lilac → peach).
+• TopBar (64px): white/light surface, rounded corners, center search, right bell + avatar dropdown.
+• LeftRail: width 260px (72px collapsed). Rounded rail with notch, soft shadow. Active item = filled pill. Items: Home, Tool Gallery, Settings, About. A “Log out” button sits at bottom when signed in.
+• Grid shell for pages:
+  [rail] 260px | [gut] 24px | [main] minmax(860px, 1fr) | [gut] 24px
+  ≤1280px: rail=72px, gutters 16px. No horizontal overflow.
+
+Main container:
+• A big rounded card with soft shadow. All page content sits inside.
+• On Home, the composer is centered; after “Generate”, composer docks to a sticky bottom bar **inside** this card; the card adds dynamic bottom padding so nothing is hidden.
+
+Typography & components:
+• Rounded pills, soft shadows, subtle borders (#EAEAEA in light).
+• Focus rings visible; aria labels everywhere.
+• Skeleton loaders for cards, gallery items.
+
+────────────────────────────────────────────────
+PAGES & BEHAVIOR
+────────────────────────────────────────────────
+Routes:
+- /           Home (hero + composer + quick example chips)
+- /gallery    Tool Gallery (rankings + sort/filter/search + pagination)
+- /t/:id      Tool page (Input Files, Settings, Run, Output Files; bottom dock for refinements)
+- /settings   Theme switcher, keyboard map, account (Supabase if available)
+- /about      About page
+- *          NotFound
+
+Home:
+• Hero heading: “Build tools with natural language”.
+• Composer: rounded input + CTA “Generate Tool”.
+• Quick example chips: [PNG→JPG] [Merge PDF] [Extract Frames] [Strip EXIF].
+• On submit: use fastlane.ts to map text → ToolSpec-like object; navigate to /t/:id (or render in place) AND dock composer to the card bottom.
+
+Tool Gallery:
+• Toolbar: Search (debounced 250ms), Filter (Category: All/Images/Video/PDF/Text), Sort (Trending/New/Runs/Rating), Timeframe (Day/Week/Month).
+• Responsive card grid (3–4 cols) with icon, name, caption, tag chips, mini stats (⭐, ▶ runs, 💾 saves), “Use” button to /t/:id.
+• Skeleton shimmers while loading; pagination or “Load more”.
+
+Tool page (/t/:id):
+• Title + subtitle; actions on right: Save, Share (stubs).
+• Feature chips: [Batch] [Resize] [Rename] [Strip EXIF] (toggles just alter the spec in-place).
+• Cards inside the main container:
+  1) Input Files (Dropzone with drag-over state; allowed MIME chips; compact file list with remove; long names truncate with tooltip).
+  2) Settings (Sliders with right-aligned numeric values; Switches; Selects).
+  3) Run row (primary button; thin top ProgressBar during run; inline %; aria-live announcements).
+  4) Output Files (empty state → rows with download links; “Download All (.zip)”).
+• BottomDock composer (inside card): sticky, rounded; placeholder “Refine this tool… e.g., ‘also resize to 1080p’”. Enter applies a delta (front-end only).
+• No content is obscured by the dock: use useDockPadding() (ResizeObserver) to set padding-bottom inside MainCard.
+
+Settings:
+• Theme switcher (see theming below), keyboard map, privacy blurb “Local runs are simulated”, Supabase account panel if env is present.
+About:
+• Simple blurb, roadmap, links.
+
+NotFound:
+• Friendly 404 illustration, “Go Home” CTA.
+
+────────────────────────────────────────────────
+THEME ENGINE (modular — easy to add themes)
+────────────────────────────────────────────────
+types.ts
+export type ThemeDefinition = {
+  id: string; name: string; type: 'light'|'dark';
+  colors: {
+    bg: string; surface: string; card: string; rail: string; border: string;
+    text: string; textDim: string; accent: string; accentSoft: string;
+    success: string; warn: string; danger: string;
+  };
+  radii: { sm:number; md:number; lg:number; card:number; rail:number };
+  shadows: { card:string; soft:string };
+  effects: { gradientFrom: string; gradientTo: string; blur:number };
+  fonts?: { base?: string; display?: string; mono?: string };
+};
+
+Provide at least 3 themes:
+• Pastel Glass (DEFAULT): white surfaces, pastel gradient bg, blue/purple accent.
+• Neo Noir (dark): charcoal bg, violet/blue accent.
+• High Contrast Light: accessibility-first.
+
+ThemeProvider:
+• Inject CSS vars on :root (e.g., --bg, --card, --rail, --accent, --radius-card, --shadow-card, --gradient-from/to).
+• ThemeSwitcher in TopBar (persist in localStorage via Zustand).
+• Adding a theme = just add a ThemeDefinition in /themes/index.ts.
+
+────────────────────────────────────────────────
+SUPABASE (optional; graceful fallback)
+────────────────────────────────────────────────
+lib/supabaseClient.ts:
+• If NEXT_PUBLIC_SUPABASE_URL/ANON_KEY are defined, init Supabase browser client.
+• Else, export a mock with no-ops and console warnings.
+
+DB schema (document in README; only use from client):
+• profiles(id, email, created_at)
+• toolspecs(id, owner, name, spec, public, created_at, updated_at)
+• favorites(user_id, toolspec_id)
+RLS: owner-only write; public read.
+
+UI:
+• “Sign in” modal (magic link). If client is mocked, show a fake signed-in state for UI testing.
+• Save tool writes to toolspecs when Supabase is configured.
+
+────────────────────────────────────────────────
+FAST-LANE INTENT (no LLM)
+────────────────────────────────────────────────
+lib/fastlane.ts:
+• Map common phrases → ToolSpec-like objects:
+  - “convert png to jpg( quality \d+)?”
+  - “mp4 to mp3( bitrate \d+)?”
+  - “merge pdf(s)”
+  - “extract gif frames( every \d+)?( max width \d+)?”
+  - “csv to json|json to csv”
+• If no match, default to “Text Formatter”.
+
+────────────────────────────────────────────────
+A11Y, KEYBOARD, PERFORMANCE
+────────────────────────────────────────────────
+• Keyboard: “/” focuses composer; Enter submits; Shift+Enter newline; Esc blur; “[” toggles rail; ⌘K/CTRL+K opens command palette.
+• aria-live="polite" for progress updates; visible focus ring on all controls; 4.5:1 contrast minimum.
+• Lazy-load heavy components (ToolRunner, GalleryGrid, CommandPalette).
+• Debounce search inputs; pre-reserve card heights to avoid layout shift.
+• prefers-reduced-motion honored; disable non-essential transitions.
+• PWA manifest + icons (optional).
+
+────────────────────────────────────────────────
+NO-OVERFLOW GUARANTEES
+────────────────────────────────────────────────
+• html, body { overflow-x: hidden; }
+• LeftRail: its list is the ONLY scroll area in the rail (header/footer pinned).
+• MainCard: use useDockPadding() to pad bottom when BottomDock is present.
+• Truncate long file names and tool titles with tooltips.
+• Inspector is not a separate column in this pastel theme; keep everything inside the main container to match the reference.
+
+────────────────────────────────────────────────
+TESTS & ACCEPTANCE
+────────────────────────────────────────────────
+Playwright smoke tests:
+1) Home → type “png to jpg quality 80” → Generate → /t/:id renders → attach sample → Run → output link appears.
+2) Gallery → search + filter + sort change grid; pagination works.
+3) Left rail collapse with “[” toggles; tooltips show in collapsed state.
+
+General acceptance:
+• The UI matches the pastel reference: rounded rail, pill active items, light surfaces, gradient background, centered rounded main container, top-right avatar.
+• No horizontal scrollbars ≥1024px; nothing is hidden under the dock.
+• Theme switcher swaps 3 themes; adding a new theme takes only adding a ThemeDefinition.
+
+Please scaffold and implement this as a working SPA with simulated runs and optional Supabase support. Keep code portable so I can move it to Next.js later.

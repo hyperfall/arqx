@@ -1,0 +1,52 @@
+Fix the left rail styling to match the reference:
+
+1) LEFT RAIL CONTAINER
+- Replace the white bg with a soft glass/gradient rail and rounded corners.
+- It must not clip children (so the active tab’s connector can overflow).
+- Example (Tailwind): 
+  <aside className="sticky top-6 h-[calc(100vh-96px)] w-64
+    rounded-2xl bg-white/55 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)]
+    ring-1 ring-black/5 overflow-visible dark:bg-white/10 dark:ring-white/10">
+
+2) ACTIVE NAV ITEM → “CONNECTED TAB”
+- Styles: pill bg, and a small **connector nub** that extends into the main card.
+- Implement the nub as an absolutely positioned span inside the active li.
+- Code pattern for each item (adjust your component):
+  <li className={cn("relative group flex items-center gap-3 h-12 px-4 rounded-xl text-sm",
+                    active ? "bg-gradient-to-r from-violet-500/20 to-violet-500/10 text-violet-700 ring-1 ring-violet-500/30" 
+                           : "hover:bg-black/5 dark:hover:bg-white/5")}>
+    {icon}<span className="truncate">{label}</span>
+    {active && (
+      <span aria-hidden
+            className="absolute right-[-16px] top-1/2 -translate-y-1/2 w-4 h-10
+                       bg-[color:var(--card)] rounded-r-xl shadow-[0_0_0_1px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)]" />
+    )}
+  </li>
+- The nub color uses the **main card** bg (`--card`) so it visually merges.
+
+3) MAIN ROUNDED CARD (PAGE CONTENT)
+- Ensure the card background is exposed to match the nub:
+  <main className="relative">
+    <section className="relative rounded-3xl bg-[color:var(--card)]
+      shadow-[0_12px_40px_rgba(0,0,0,0.08)] ring-1 ring-black/5
+      px-10 py-8 overflow-visible">
+- Keep grid gap small enough so the nub touches/overlaps the card edge (gap ~20–24px).
+- Set z-index so nub sits above main card: li { z-10 }, nub { z-20 }, main card { z-0 }.
+
+4) CONSISTENCY / THEME TOKENS
+- Define CSS vars once (in :root or ThemeProvider):
+  --card:#fff; --rail:rgba(255,255,255,.55);
+- Use them in both the rail and main card to guarantee seamless color.
+
+5) COLLAPSED STATE
+- When the rail collapses (72px), hide the nub. Active item uses only the pill style.
+- Tooltips remain on icons.
+
+6) NO OVERFLOWS
+- left rail: overflow-visible; inner list uses <ScrollArea class="h-full overflow-y-auto">
+- main grid: overflow-x-hidden.
+
+Deliverables:
+- Update LeftRail.tsx to use the glass rail styles.
+- Update NavItem component with the “connector nub”.
+- Ensure the main card uses --card bg and ring so the connector blends.

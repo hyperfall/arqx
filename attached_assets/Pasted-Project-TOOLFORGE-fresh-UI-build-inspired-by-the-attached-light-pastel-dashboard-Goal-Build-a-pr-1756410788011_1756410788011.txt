@@ -1,0 +1,272 @@
+Project: TOOLFORGE — fresh UI build inspired by the attached light/pastel dashboard
+Goal: Build a production-grade, desktop-first Next.js app with a left pane like the reference (rounded rail, pill highlights), a centered rounded main container with a ChatGPT-style “describe a tool” composer, a top-right user area, and a Tool Gallery page (rankings + sort/filter/search) in the same visual language. Add a modular theming system and wire Supabase (auth + simple tables) behind env flags. No backend code beyond Supabase client; keep all “runs” simulated.
+
+────────────────────────────────────────────────────────────────────────
+STACK
+────────────────────────────────────────────────────────────────────────
+• Next.js (App Router) + TypeScript
+• Tailwind CSS + shadcn/ui + lucide-react
+• State: Zustand
+• Validation: Zod
+• Supabase JS client (auth + storage + Postgres tables; optional when env vars missing)
+• shadcn ScrollArea
+• Testing: Playwright (1–2 smoke tests)
+• Optional PWA manifest for installability
+
+────────────────────────────────────────────────────────────────────────
+GLOBAL LAYOUT & STYLE (match reference)
+────────────────────────────────────────────────────────────────────────
+• Background: soft diagonal gradient (top-left lilac → bottom-right peach). No tiling seams.
+• Three zones below TopBar:
+  – Left Pane (rounded rail with notch and pill highlights) width 260px; collapsed width 72px (icons only); own scroll.
+  – Main Container: large rounded card with soft shadow; centered in grid; all page content lives inside this card.
+  – Right user cluster is NOT a column; it’s a small top-right avatar + bell area inside the TopBar, exactly like the reference.
+• TopBar: white/very-light surface, 64px height, rounded corners where it meets the left rail; contains:
+  – Brand (left)
+  – Global search field (center) with subtle glass effect (placeholder “Search tools or commands…”)
+  – Right actions: notification bell, avatar with dropdown (Profile, Settings, Sign out)
+• Grid shell (applies to all pages under TopBar):
+  [rail] 260px  [gut] 24px  [main] minmax(860px, 1fr)  [gut] 24px
+  – On ≤1280px: rail collapses to 72px and main grows; gutters become 16px.
+  – Prevent any horizontal overflow: html, body { overflow-x: hidden }
+• Bottom composer: on Home after first “Generate”, the composer docks to a sticky bottom bar INSIDE the main rounded card (not full-viewport). The main card gains padding-bottom equal to the dock height so content is never hidden.
+
+────────────────────────────────────────────────────────────────────────
+NAVIGATION (left pane like the reference)
+────────────────────────────────────────────────────────────────────────
+Left Pane items (exact order/icons):
+• Home
+• Tool Gallery
+• Settings
+• About
+(plus a “Log out” button at the bottom when signed in)
+
+Visuals:
+• Use a rounded left rail with a subtle inset shadow and a light surface color.
+• Active item uses a filled pill with subtle drop shadow and icon + label (bold). Inactive items: icon + label muted.
+• Add a small “hamburger” button at the very top of the rail to collapse/expand (72px icon rail). Tooltips show on hover when collapsed.
+
+Keyboard:
+• `[` toggles collapse/expand.
+• Arrow keys move focus through nav items; Enter activates.
+
+Accessibility:
+• Clear focus ring (2px brand-accent), aria-current for active nav, aria-labels for icons in collapsed state.
+
+────────────────────────────────────────────────────────────────────────
+PAGES
+────────────────────────────────────────────────────────────────────────
+Routes:
+• /           → Home (composer)
+• /gallery    → Tool Gallery (rankings + sort/filter/search)
+• /settings   → Settings (theme, account, keyboard shortcuts)
+• /about      → About
+• /t/[id]     → Tool page (generated tool UI)
+• /404        → Styled 404 page that matches the theme
+• error.tsx   → Friendly error boundary screen
+
+Home page (inside the big rounded card):
+• Hero header: “Build tools with natural language” (bold; black/dark text) + one-line subtitle.
+• Center composer row: rounded input + CTA button “Generate Tool”.
+• Quick example chips below: [PNG→JPG] [Merge PDF] [Extract Frames] [Strip EXIF]. Keyboard focusable.
+• On submit:
+  – Animate composer to sticky bottom dock (inside the card) with a gentle 200–240ms ease.
+  – Immediately render a Tool page view in the same main card (no route change needed for MVP), OR `router.push(/t/:id)` if cleaner; your choice, but maintain docking behavior.
+• Ensure no content is obscured by dock: apply dynamic padding via a `useDockPadding()` hook (ResizeObserver) on the main card.
+
+Tool Gallery (/gallery):
+• Same rounded main container layout as Home.
+• Header row: title “Tool Gallery”, secondary text, and a small stat (“2.3k tools”).
+• Toolbar row:
+  – Search input (placeholder “Search tools…”)
+  – Filter dropdown (Category: All / Images / Video / PDF / Text)
+  – Sort select (Trending / New / Most Runs / Highest Rating)
+  – Timeframe tabs (Day / Week / Month)
+• Card grid of tools (3 or 4 columns depending on width) with:
+  – Icon + name + caption
+  – Chips for tags (image, video, pdf)
+  – Mini stat row: ⭐ rating, ▶ runs, 💾 saves
+  – “Use” button that routes to /t/[id]
+• Pagination or “Load more” with skeleton shimmer loaders.
+• All actions keyboard accessible; trap no focus.
+
+Tool page (/t/[id]):
+• Title row: “PNG to JPEG Converter” (example) with subtitle. Actions on the right: Save, Share.
+• Feature chips under the title: [Batch] [Resize] [Rename] [Strip EXIF] (toggled appearance).
+• Cards within the page (inside the main container):
+  1) Input Files — drag-and-drop area (dashed border), allowed MIME chips, compact file list with remove button, size + modified date. Long names truncate with tooltip.
+  2) Settings — sliders (value labels on the right), switches, selects. Use consistent spacing and alignment.
+  3) Run row — full-width button with inline % + a thin top progress bar that appears during “running”.
+  4) Output Files — empty state illustration; after run show file rows with filename, size, and a “Download all (.zip)” button.
+• Bottom dock composer (sticky inside card) with placeholder “Refine this tool… e.g., ‘also resize to 1080p’”. Hitting Enter performs a delta change (front-end stub).
+
+Settings page:
+• Sections inside the big rounded container:
+  – Theme: ThemeSwitcher (see “Theming”) + preview swatches.
+  – Account: user email, sign-in method, sign out (if Supabase configured).
+  – Keyboard: list of shortcuts (/, [, ], Enter, Shift+Enter, Esc, ⌘K/Ctrl K).
+  – Privacy: “Local processing” banner and data policy links.
+
+About page:
+• App description, roadmap, and links.
+
+404 page:
+• Cute illustration + “Go Home” button; matches background gradient.
+
+────────────────────────────────────────────────────────────────────────
+COMPONENTS (shared)
+────────────────────────────────────────────────────────────────────────
+• TopBar.tsx — brand, global search, bell, avatar menu (Profile/Settings/Sign out)
+• LeftRail.tsx — rail layout; collapse logic; ScrollArea for the menu list; bottom “Log out”
+• MainCard.tsx — large rounded card wrapper; applies internal grid and bottom padding
+• Composer.tsx — center + dock variants; transitions; keyboard: `/` focus; Enter submit; Shift+Enter newline; Esc blur
+• ToolRunner.tsx — renders ToolSpec-like object into form controls; sim run state
+• Dropzone.tsx — drag-over state; accept types; previews list with truncation
+• Slider.tsx & Switch.tsx — consistent labels + right-aligned numeric values (tabular-nums)
+• OutputList.tsx — empty state + downloadable rows + “Download all”
+• ProgressBar.tsx — thin top bar that streams 0→100%
+• CommandPalette.tsx (⌘K) — jump to routes and recent tools
+• Breadcrumbs.tsx — “Home › Tool Gallery › {Tool}” (truncate last)
+• Skeleton.tsx — card loaders and gallery item shimmers
+• ErrorBoundary.tsx — fallback UI with “Retry”
+• Toasts — success/error notifications
+
+────────────────────────────────────────────────────────────────────────
+THEMING (modular; easy to add themes)
+────────────────────────────────────────────────────────────────────────
+Implement a simple Theme Engine:
+
+types.ts
+export type ThemeDefinition = {
+  id: string; name: string; description?: string; type: 'light' | 'dark';
+  colors: {
+    bg: string; surface: string; card: string; rail: string; border: string;
+    text: string; textDim: string; accent: string; accentSoft: string;
+    success: string; warn: string; danger: string;
+  };
+  radii: { sm:number; md:number; lg:number; card:number; rail:number };
+  shadows: { card:string; soft:string };
+  effects: {
+    gradientFrom: string; gradientTo: string; // page background
+    blur: number; //
+  };
+  fonts?: { base?: string; display?: string; mono?: string };
+};
+
+• Provide at least 3 themes:
+  – “Pastel Glass” (DEFAULT) → matches the screenshot: white surfaces, very light rail, lilac→peach bg gradient, blue/purple accent.
+  – “Neo Noir” → dark background, violet/blue accent, white text.
+  – “High Contrast Light” → AA+ accessible variant.
+
+• ThemeProvider reads selected theme from Zustand + localStorage and injects CSS variables on :root:
+  --bg, --surface, --card, --rail, --border, --text, --text-dim, --accent, --accent-soft, --radius-card, --shadow-card, --gradient-from, --gradient-to, etc.
+• ThemeSwitcher (select) in TopBar; adding a theme = add a new ThemeDefinition to /themes/index.ts; no code changes elsewhere.
+• Apply variables to Tailwind via :root and use in component classes (e.g., bg-[color:var(--card)]).
+
+────────────────────────────────────────────────────────────────────────
+SUPABASE INTEGRATION (optional but wired)
+────────────────────────────────────────────────────────────────────────
+• Create a `lib/supabaseClient.ts` that initializes the client from `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. If envs missing, export a mock that no-ops but logs a warning.
+• Minimal schema (document in README):
+  tables:
+    profiles (id uuid pk, email text, created_at)
+    toolspecs (id uuid pk, owner uuid fk profiles.id, name text, spec jsonb, created_at, updated_at, public boolean default false)
+    favorites (user_id uuid, toolspec_id uuid, pk(user_id, toolspec_id))
+  RLS:
+    – profiles: user can select/update own row
+    – toolspecs: owner can read/write; public=true readable by all
+    – favorites: user can read/write own
+• Auth:
+  – Add “Sign in with magic link” modal; if Supabase configured show auth; else keep a fake signed-in state (Zustand).
+  – Avatar menu shows email + “Sign out” when authenticated.
+
+────────────────────────────────────────────────────────────────────────
+FAST-LANE INTENT (front-end only)
+────────────────────────────────────────────────────────────────────────
+• Implement a small rules map (regex → canned ToolSpec-like objects) for:
+  – png→jpg (quality)
+  – mp4→mp3 (bitrate)
+  – merge pdf(s)
+  – gif frames (every N, max width)
+  – csv↔json
+• If no match, load a friendly “Text Formatter” tool.
+• “Generate Tool” uses this fast-lane; later a planner can be added.
+
+────────────────────────────────────────────────────────────────────────
+PERFORMANCE & POLISH
+────────────────────────────────────────────────────────────────────────
+• Keep MainCard content to ≤ 1100px width; card padding 24–28px.
+• Lazy load: ToolRunner, CommandPalette, Gallery grid.
+• Debounce search inputs (250ms).
+• Avoid layout shift: reserve heights for skeletons; preload the display font.
+• Add `prefers-reduced-motion` guards to disable non-essential animations.
+• Add simple PWA manifest + icons to allow “Install” (optional).
+
+────────────────────────────────────────────────────────────────────────
+ERRORS, LOADERS & STATES
+────────────────────────────────────────────────────────────────────────
+• Skeletons for gallery items, tool cards, and main card load.
+• Inline validation on file type/size; error callouts inside cards (no blocking modals).
+• Global error boundary (error.tsx) with Reset button.
+• 404 page with “Go Home” CTA.
+• Toasts for success/failure (shadcn toast) with ARIA role="status".
+• aria-live="polite" for progress announcements (“Processing 40%…”).
+
+────────────────────────────────────────────────────────────────────────
+ROUTES / FILES
+────────────────────────────────────────────────────────────────────────
+app/
+  layout.tsx          // gradient bg, TopBar, grid: LeftRail + MainCard
+  page.tsx            // Home
+  gallery/page.tsx    // Tool Gallery
+  settings/page.tsx
+  about/page.tsx
+  t/[id]/page.tsx     // Tool page
+  not-found.tsx       // 404
+  error.tsx           // error boundary
+
+components/
+  chrome/TopBar.tsx  chrome/LeftRail.tsx  chrome/Breadcrumbs.tsx  chrome/BottomDock.tsx  chrome/CommandPalette.tsx
+  cards/MainCard.tsx
+  composer/Composer.tsx
+  tool/ToolRunner.tsx tool/Dropzone.tsx tool/Slider.tsx tool/Switch.tsx tool/OutputList.tsx tool/ProgressBar.tsx
+  gallery/GalleryToolbar.tsx gallery/GalleryGrid.tsx gallery/GalleryCard.tsx
+  ui/Skeleton.tsx ui/EmptyState.tsx ui/ToastProvider.tsx
+
+themes/
+  types.ts  index.ts (3 themes)  ThemeProvider.tsx  ThemeSwitcher.tsx
+
+lib/
+  fastlane.ts  seeds.ts  keyboard.ts  useDockPadding.ts  supabaseClient.ts
+
+store/
+  useUIStore.ts  useAuthStore.ts  useRecentStore.ts
+
+public/
+  icons/  images/  pwa/manifest.json  favicons
+
+tests/
+  e2e/home.spec.ts  e2e/gallery.spec.ts
+
+────────────────────────────────────────────────────────────────────────
+KEYBOARD & A11Y
+────────────────────────────────────────────────────────────────────────
+• `/` focus composer; Enter submit; Shift+Enter newline; Esc blur
+• `[` collapse/expand left rail
+• ⌘K / Ctrl K open CommandPalette
+• All interactive elements have visible focus states; labels and aria-attributes added; 4.5:1 contrast for text.
+
+────────────────────────────────────────────────────────────────────────
+ACCEPTANCE CRITERIA
+────────────────────────────────────────────────────────────────────────
+1) The left rail matches the reference style (rounded, pill active state, subtle shadow), collapses to an icon rail with tooltips, and never overflows (its list scrolls independently).
+2) TopBar shows brand, global search, bell, and avatar menu on the right exactly like the reference. On mobile/≤1280, rail collapses and TopBar remains usable.
+3) The main rounded card renders the Home composer centered; on submit the composer docks to the bottom INSIDE the card and the Tool page content appears without any content hidden behind the dock.
+4) Tool Gallery page provides search, filter, sort, timeframe tabs, and a responsive card grid with skeleton loaders and pagination/load more.
+5) Tool page contains Input Files, Settings, Run (with progress), and Output Files sections; long filenames truncate with tooltips; Download All available after run; progress also announces via aria-live.
+6) Theme system works: switch among “Pastel Glass”, “Neo Noir”, “High Contrast Light” with a single ThemeDefinition change; adding a new theme requires only adding to /themes/index.ts.
+7) Supabase client is integrated: if env vars exist, Sign in / Sign out works (magic link form); saving a tool writes to `toolspecs` table; favorites work. If envs are missing, app gracefully falls back to a local mocked auth state.
+8) No horizontal scrollbars on ≥1024 width; cards and lists never overflow; skeletons prevent layout shifts.
+9) Playwright smoke test: visit Home → type “png to jpg quality 80” → Generate → attach sample image (fixture) → Run → output link appears; and visit Gallery → filter + sort work.
+
+Build from scratch with this structure and deliver a runnable Next.js app that matches the reference style and behavior.
