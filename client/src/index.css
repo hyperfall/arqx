@@ -5,94 +5,98 @@
 @tailwind utilities;
 
 :root {
-  /* Pastel Glass Theme (Default) */
-  --background: hsl(250, 20%, 97%);
-  --foreground: hsl(222, 47%, 11%);
+  /* Modern Light Theme (Default) */
+  --background: hsl(0, 0%, 98%);
+  --foreground: hsl(0, 0%, 9%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(222, 47%, 11%);
+  --card-foreground: hsl(0, 0%, 9%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(222, 47%, 11%);
-  --primary: hsl(262, 69%, 66%);
+  --popover-foreground: hsl(0, 0%, 9%);
+  --primary: hsl(212, 100%, 50%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(251, 25%, 95%);
-  --secondary-foreground: hsl(222, 47%, 11%);
-  --muted: hsl(250, 20%, 95%);
-  --muted-foreground: hsl(215, 20%, 65%);
-  --accent: hsl(262, 69%, 66%);
+  --secondary: hsl(212, 100%, 96%);
+  --secondary-foreground: hsl(0, 0%, 9%);
+  --muted: hsl(0, 0%, 96%);
+  --muted-foreground: hsl(0, 0%, 45%);
+  --accent: hsl(212, 100%, 50%);
   --accent-foreground: hsl(0, 0%, 100%);
-  --destructive: hsl(0, 84%, 60%);
+  --destructive: hsl(0, 84%, 55%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(220, 13%, 91%);
-  --input: hsl(220, 13%, 91%);
-  --ring: hsl(262, 69%, 66%);
-  --radius: 12px;
-  --rail: rgba(255, 255, 255, 0.55);
+  --border: hsl(0, 0%, 88%);
+  --input: hsl(0, 0%, 100%);
+  --ring: hsl(212, 100%, 50%);
+  --radius: 14px;
+  --rail: hsl(0, 0%, 97%);
   --surface: hsl(0, 0%, 100%);
-  --gradient-from: hsl(270, 50%, 90%);
-  --gradient-to: hsl(30, 60%, 90%);
+  --gradient-from: hsl(210, 40%, 98%);
+  --gradient-to: hsl(212, 30%, 96%);
   
   /* Charts */
-  --chart-1: hsl(262, 69%, 66%);
-  --chart-2: hsl(159, 100%, 36%);
-  --chart-3: hsl(42, 93%, 56%);
+  --chart-1: hsl(212, 100%, 50%);
+  --chart-2: hsl(142, 71%, 45%);
+  --chart-3: hsl(38, 100%, 50%);
   --chart-4: hsl(147, 79%, 42%);
   --chart-5: hsl(341, 75%, 51%);
   
   /* Sidebar (Rail) */
-  --sidebar: hsl(0, 0%, 98%);
-  --sidebar-foreground: hsl(222, 47%, 11%);
-  --sidebar-primary: hsl(262, 69%, 66%);
+  --sidebar: hsl(0, 0%, 97%);
+  --sidebar-foreground: hsl(0, 0%, 9%);
+  --sidebar-primary: hsl(212, 100%, 50%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(251, 25%, 95%);
-  --sidebar-accent-foreground: hsl(222, 47%, 11%);
-  --sidebar-border: hsl(220, 13%, 91%);
-  --sidebar-ring: hsl(262, 69%, 66%);
+  --sidebar-accent: hsl(212, 100%, 96%);
+  --sidebar-accent-foreground: hsl(0, 0%, 9%);
+  --sidebar-border: hsl(0, 0%, 88%);
+  --sidebar-ring: hsl(212, 100%, 50%);
   
   /* Fonts */
   --font-sans: Inter, system-ui, sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: Menlo, monospace;
+  --font-mono: JetBrains Mono, Menlo, monospace;
   
   /* Shadows */
-  --shadow-card: 0 4px 12px -2px hsl(0 0% 0% / 0.08), 0 2px 8px -2px hsl(0 0% 0% / 0.04);
-  --shadow-soft: 0 2px 4px hsl(262 69% 66% / 0.3);
+  --shadow-card: 0 8px 32px -8px hsl(0 0% 0% / 0.08), 0 2px 8px -2px hsl(0 0% 0% / 0.04);
+  --shadow-soft: 0 4px 12px hsl(212 100% 50% / 0.15);
   --shadow-rail: inset -1px 0 0 var(--border), 0 4px 8px -2px hsl(0 0% 0% / 0.1);
 }
 
 .dark {
-  /* Neo Noir Theme */
-  --background: hsl(224, 71%, 4%);
-  --foreground: hsl(210, 20%, 98%);
-  --card: hsl(224, 71%, 4%);
-  --card-foreground: hsl(210, 20%, 98%);
-  --popover: hsl(224, 71%, 4%);
-  --popover-foreground: hsl(210, 20%, 98%);
-  --primary: hsl(263, 70%, 50%);
-  --primary-foreground: hsl(210, 20%, 98%);
-  --secondary: hsl(215, 27%, 17%);
-  --secondary-foreground: hsl(210, 20%, 98%);
-  --muted: hsl(215, 27%, 17%);
-  --muted-foreground: hsl(217, 10%, 64%);
-  --accent: hsl(263, 70%, 50%);
-  --accent-foreground: hsl(210, 20%, 98%);
-  --destructive: hsl(0, 63%, 31%);
-  --destructive-foreground: hsl(210, 20%, 98%);
-  --border: hsl(215, 27%, 17%);
-  --input: hsl(215, 27%, 17%);
-  --ring: hsl(263, 70%, 50%);
-  --rail: rgba(255, 255, 255, 0.1);
-  --surface: hsl(224, 71%, 4%);
-  --gradient-from: hsl(250, 50%, 10%);
-  --gradient-to: hsl(270, 50%, 15%);
+  /* Modern Dark Theme */
+  --background: hsl(0, 0%, 7%);
+  --foreground: hsl(0, 0%, 98%);
+  --card: hsl(0, 0%, 10%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --popover: hsl(0, 0%, 10%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --primary: hsl(212, 100%, 60%);
+  --primary-foreground: hsl(0, 0%, 9%);
+  --secondary: hsl(212, 50%, 12%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --muted: hsl(0, 0%, 15%);
+  --muted-foreground: hsl(0, 0%, 65%);
+  --accent: hsl(212, 100%, 60%);
+  --accent-foreground: hsl(0, 0%, 9%);
+  --destructive: hsl(0, 80%, 65%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --border: hsl(0, 0%, 18%);
+  --input: hsl(0, 0%, 13%);
+  --ring: hsl(212, 100%, 60%);
+  --rail: hsl(0, 0%, 5%);
+  --surface: hsl(0, 0%, 10%);
+  --gradient-from: hsl(0, 0%, 8%);
+  --gradient-to: hsl(212, 20%, 9%);
   
-  --sidebar: hsl(215, 28%, 8%);
-  --sidebar-foreground: hsl(210, 20%, 98%);
-  --sidebar-primary: hsl(263, 70%, 50%);
-  --sidebar-primary-foreground: hsl(210, 20%, 98%);
-  --sidebar-accent: hsl(215, 27%, 17%);
-  --sidebar-accent-foreground: hsl(210, 20%, 98%);
-  --sidebar-border: hsl(215, 27%, 17%);
-  --sidebar-ring: hsl(263, 70%, 50%);
+  --sidebar: hsl(0, 0%, 5%);
+  --sidebar-foreground: hsl(0, 0%, 98%);
+  --sidebar-primary: hsl(212, 100%, 60%);
+  --sidebar-primary-foreground: hsl(0, 0%, 9%);
+  --sidebar-accent: hsl(212, 50%, 12%);
+  --sidebar-accent-foreground: hsl(0, 0%, 98%);
+  --sidebar-border: hsl(0, 0%, 18%);
+  --sidebar-ring: hsl(212, 100%, 60%);
+  
+  /* Shadows for dark theme */
+  --shadow-card: 0 12px 40px -8px hsl(0 0% 0% / 0.4), 0 4px 16px -4px hsl(0 0% 0% / 0.3);
+  --shadow-soft: 0 6px 20px hsl(212 100% 60% / 0.25);
 }
 
 @layer base {
@@ -109,6 +113,27 @@
     background: linear-gradient(135deg, var(--gradient-from) 0%, var(--gradient-to) 100%);
     min-height: 100vh;
     font-family: var(--font-sans);
+  }
+
+  /* Ensure proper text colors for form elements */
+  input, textarea, select {
+    color: var(--foreground) !important;
+    background-color: var(--input) !important;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--muted-foreground) !important;
+  }
+
+  /* Ensure form elements are readable in both themes */
+  .dark input, .dark textarea, .dark select {
+    color: var(--foreground) !important;
+    background-color: var(--input) !important;
+    border-color: var(--border);
+  }
+
+  .dark input::placeholder, .dark textarea::placeholder {
+    color: var(--muted-foreground) !important;
   }
 }
 

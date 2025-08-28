@@ -1,61 +1,61 @@
-// Pastel Glass Theme - Light and airy with soft pastels
+// Modern Light Theme - Clean, minimalist design with excellent readability
 export const pastelGlass = {
   id: 'pastel-glass',
-  name: 'Pastel Glass',
-  description: 'Light and airy with soft pastels',
+  name: 'Modern Light',
+  description: 'Clean and minimalist with excellent contrast',
   type: 'light' as const,
   
   // Main colors - easy to customize
   colors: {
     // Backgrounds
-    bg: 'hsl(250, 20%, 97%)',        // Main background
-    surface: 'hsl(0, 0%, 100%)',     // Cards, modals
-    card: 'hsl(0, 0%, 100%)',        // Main content card
-    rail: 'hsl(0, 0%, 98%)',         // Sidebar background
+    bg: 'hsl(0, 0%, 98%)',           // Clean off-white background
+    surface: 'hsl(0, 0%, 100%)',     // Pure white surfaces
+    card: 'hsl(0, 0%, 100%)',        // White content card
+    rail: 'hsl(0, 0%, 97%)',         // Subtle gray sidebar
     
     // Borders and dividers
-    border: 'hsl(220, 13%, 91%)',
+    border: 'hsl(0, 0%, 88%)',       // Modern gray borders
     
-    // Text colors
-    text: 'hsl(222, 47%, 11%)',      // Primary text
-    textDim: 'hsl(215, 20%, 65%)',   // Secondary text
+    // Text colors - optimized for readability
+    text: 'hsl(0, 0%, 9%)',          // Near-black for maximum contrast
+    textDim: 'hsl(0, 0%, 45%)',      // Medium gray for secondary text
     
-    // Accent colors
-    accent: 'hsl(262, 69%, 66%)',     // Primary accent (purple)
-    accentSoft: 'hsl(251, 25%, 95%)', // Light accent background
+    // Accent colors - modern blue
+    accent: 'hsl(212, 100%, 50%)',    // Vibrant modern blue
+    accentSoft: 'hsl(212, 100%, 96%)', // Very light blue background
     
-    // Status colors
-    success: 'hsl(142, 76%, 36%)',   // Green
-    warn: 'hsl(38, 92%, 50%)',       // Orange
-    danger: 'hsl(0, 84%, 60%)',      // Red
+    // Status colors - modern and clear
+    success: 'hsl(142, 71%, 45%)',   // Fresh green
+    warn: 'hsl(38, 100%, 50%)',      // Clear orange
+    danger: 'hsl(0, 84%, 55%)',      // Modern red
   },
   
-  // Border radius values
+  // Border radius values - modern and clean
   radii: {
-    sm: 4,
-    md: 8,
-    lg: 12,
-    card: 16,
-    rail: 16,
+    sm: 6,
+    md: 10,
+    lg: 14,
+    card: 20,
+    rail: 20,
   },
   
-  // Shadow definitions
+  // Shadow definitions - subtle and modern
   shadows: {
-    card: '0 4px 12px -2px hsl(0 0% 0% / 0.08), 0 2px 8px -2px hsl(0 0% 0% / 0.04)',
-    soft: '0 2px 4px hsl(262 69% 66% / 0.3)',
+    card: '0 8px 32px -8px hsl(0 0% 0% / 0.08), 0 2px 8px -2px hsl(0 0% 0% / 0.04)',
+    soft: '0 4px 12px hsl(212 100% 50% / 0.15)',
   },
   
   // Glass and gradient effects
   effects: {
-    gradientFrom: 'hsl(270, 50%, 90%)',
-    gradientTo: 'hsl(30, 60%, 90%)',
-    blur: 10,
+    gradientFrom: 'hsl(210, 40%, 98%)',
+    gradientTo: 'hsl(212, 30%, 96%)',
+    blur: 16,
   },
   
-  // Typography (optional)
+  // Typography
   fonts: {
     base: 'Inter, system-ui, sans-serif',
     display: 'Inter, system-ui, sans-serif',
-    mono: 'Menlo, monospace',
+    mono: 'JetBrains Mono, Menlo, monospace',
   },
 };
