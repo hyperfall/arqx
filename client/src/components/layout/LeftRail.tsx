@@ -30,10 +30,10 @@ export default function LeftRail() {
         variant="ghost"
         onClick={() => navigate(href)}
         className={cn(
-          "relative group flex items-center gap-3 h-12 px-4 text-sm justify-start w-full transition-all duration-200",
+          "relative group flex items-center gap-3 h-12 px-4 text-sm justify-start transition-all duration-200",
           active 
-            ? "bg-[color:var(--card)] text-foreground shadow-lg rounded-l-xl" 
-            : "hover:bg-white/60 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground rounded-xl",
+            ? "bg-[color:var(--card)] text-foreground shadow-lg rounded-l-xl mr-[-12px] pr-8 relative z-10 rounded-r-xl" 
+            : "hover:bg-white/60 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground rounded-xl w-full",
           isRailCollapsed && "px-3 justify-center"
         )}
         data-testid={`nav-${label.toLowerCase().replace(/\s+/g, '-')}`}
@@ -41,19 +41,6 @@ export default function LeftRail() {
         <Icon className="w-4 h-4 flex-shrink-0" />
         {!isRailCollapsed && <span className="truncate">{label}</span>}
         
-        {/* Seamless connection to main card for active item */}
-        {active && !isRailCollapsed && (
-          <>
-            <span 
-              aria-hidden
-              className="absolute right-0 top-0 bottom-0 w-4 bg-[color:var(--card)] z-10"
-            />
-            <span 
-              aria-hidden
-              className="absolute right-[-4px] top-0 bottom-0 w-4 bg-[color:var(--card)] rounded-r-xl shadow-lg z-10"
-            />
-          </>
-        )}
       </Button>
     );
 
