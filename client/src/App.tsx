@@ -36,7 +36,7 @@ function AppLayout() {
     <div className="overflow-hidden h-screen flex flex-col">
       <TopBar />
       <div className="flex-1 pt-16 overflow-hidden">
-        <div className="grid grid-cols-[260px_1fr] xl:grid-cols-[260px_minmax(860px,1fr)] gap-0 px-6 py-6 h-full">
+        <div className="grid grid-cols-[260px_1fr] xl:grid-cols-[260px_minmax(860px,1fr)] gap-1 px-6 py-6 h-full">
           <LeftRail />
           <MainCard>
             <Router />
