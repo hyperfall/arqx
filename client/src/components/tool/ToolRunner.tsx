@@ -144,91 +144,99 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
-      {/* Input Files Card */}
-      <Card className="w-full">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Input Files</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <Dropzone
-            accept={toolSpec.inputs.accept}
-            maxSize={toolSpec.inputs.maxSize}
-            multiple={toolSpec.inputs.multiple}
-            files={files}
-            onFilesChange={setFiles}
-          />
-        </CardContent>
-      </Card>
+    <div className="max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column: Input Files and Settings */}
+        <div className="space-y-5">
+          {/* Input Files Card */}
+          <Card className="w-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Input Files</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Dropzone
+                accept={toolSpec.inputs.accept}
+                maxSize={toolSpec.inputs.maxSize}
+                multiple={toolSpec.inputs.multiple}
+                files={files}
+                onFilesChange={setFiles}
+              />
+            </CardContent>
+          </Card>
 
-      {/* Settings Card */}
-      <Card className="w-full">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0 space-y-4">
-          {Object.entries(toolSpec.settings).map(([key, setting]) => 
-            renderSetting(key, setting)
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Run Card */}
-      <Card className="w-full">
-        <CardContent className="p-5">
-          <ProgressBar isVisible={isRunning} progress={progress} />
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-foreground">
-                {isRunning ? `Processing... ${Math.round(progress)}%` : "Ready to Process"}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {isRunning 
-                  ? "Please wait while we process your files" 
-                  : "Click run to start processing your files"
-                }
-              </p>
-            </div>
-            <Button
-              onClick={handleRun}
-              disabled={files.length === 0 || isRunning}
-              className={`px-6 py-2.5 rounded-lg font-medium transition-colors focus-ring flex items-center space-x-2 ${
-                progress === 100 
-                  ? "bg-green-500 hover:bg-green-600 text-white" 
-                  : "bg-primary hover:bg-primary/90 text-primary-foreground"
-              }`}
-              data-testid="run-tool-button"
-            >
-              {isRunning ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Running...</span>
-                </>
-              ) : progress === 100 ? (
-                <>
-                  <span>✓</span>
-                  <span>Complete</span>
-                </>
-              ) : (
-                <>
-                  <span>▶</span>
-                  <span>Run Tool</span>
-                </>
+          {/* Settings Card */}
+          <Card className="w-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 space-y-4">
+              {Object.entries(toolSpec.settings).map(([key, setting]) => 
+                renderSetting(key, setting)
               )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Output Files Card */}
-      <Card className="w-full">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Output Files</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <OutputList files={outputFiles} />
-        </CardContent>
-      </Card>
+        {/* Right Column: Ready to Process and Output Files */}
+        <div className="space-y-5">
+          {/* Run Card */}
+          <Card className="w-full">
+            <CardContent className="p-5">
+              <ProgressBar isVisible={isRunning} progress={progress} />
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {isRunning ? `Processing... ${Math.round(progress)}%` : "Ready to Process"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {isRunning 
+                      ? "Please wait while we process your files" 
+                      : "Click run to start processing your files"
+                    }
+                  </p>
+                </div>
+                <Button
+                  onClick={handleRun}
+                  disabled={files.length === 0 || isRunning}
+                  className={`px-6 py-2.5 rounded-lg font-medium transition-colors focus-ring flex items-center space-x-2 ${
+                    progress === 100 
+                      ? "bg-green-500 hover:bg-green-600 text-white" 
+                      : "bg-primary hover:bg-primary/90 text-primary-foreground"
+                  }`}
+                  data-testid="run-tool-button"
+                >
+                  {isRunning ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Running...</span>
+                    </>
+                  ) : progress === 100 ? (
+                    <>
+                      <span>✓</span>
+                      <span>Complete</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>▶</span>
+                      <span>Run Tool</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Output Files Card */}
+          <Card className="w-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Output Files</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <OutputList files={outputFiles} />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
