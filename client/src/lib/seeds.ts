@@ -91,6 +91,32 @@ export const galleryTools: GalleryTool[] = [
     createdAt: '2024-01-03T13:20:00Z',
     public: true,
   },
+  {
+    id: 'exif-stripper',
+    name: 'EXIF Data Stripper',
+    description: 'Remove metadata and EXIF data from images for privacy',
+    category: 'Images',
+    icon: 'database',
+    rating: 4.7,
+    runs: 3200,
+    saves: 445,
+    tags: ['image', 'privacy', 'metadata'],
+    createdAt: '2024-01-02T08:45:00Z',
+    public: true,
+  },
+  {
+    id: 'text-formatter',
+    name: 'Advanced Text Formatter',
+    description: 'Format and clean text with various transformation options',
+    category: 'Text',
+    icon: 'type',
+    rating: 4.3,
+    runs: 6800,
+    saves: 512,
+    tags: ['text', 'format', 'clean'],
+    createdAt: '2024-01-01T12:00:00Z',
+    public: true,
+  },
 ];
 
 export const categories = ['All', 'Images', 'Video', 'PDF', 'Audio', 'Text', 'Data'];

@@ -27,7 +27,7 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
     spec: {
       name: 'PNG to JPEG Converter',
       description: 'Convert PNG images to JPEG format with customizable quality settings',
-      category: 'Image',
+      category: 'Images',
       icon: 'image',
       settings: {
         quality: {
@@ -97,7 +97,7 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
     spec: {
       name: 'PDF Merger',
       description: 'Combine multiple PDF files into a single document',
-      category: 'Document',
+      category: 'PDF',
       icon: 'file-text',
       settings: {
         bookmarks: {
@@ -121,8 +121,8 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
   {
     regex: /extract\s+(gif\s+)?frames/i,
     spec: {
-      name: 'Frame Extractor',
-      description: 'Extract individual frames from GIF animations or videos',
+      name: 'Video Frame Extractor',
+      description: 'Extract individual frames from videos or GIF animations',
       category: 'Video',
       icon: 'film',
       settings: {
@@ -180,6 +180,39 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
       inputs: {
         accept: ['text/csv', 'application/json', '.csv', '.json'],
         maxSize: 10 * 1024 * 1024, // 10MB
+        multiple: true,
+      },
+    },
+  },
+  {
+    regex: /strip\s+(exif|metadata)/i,
+    spec: {
+      name: 'EXIF Data Stripper',
+      description: 'Remove metadata and EXIF data from images for privacy',
+      category: 'Images',
+      icon: 'database',
+      settings: {
+        preserveOrientation: {
+          type: 'checkbox',
+          label: 'Preserve Image Orientation',
+          default: true,
+        },
+        stripAll: {
+          type: 'checkbox',
+          label: 'Strip All Metadata',
+          default: true,
+        },
+        compressionLevel: {
+          type: 'slider',
+          label: 'Compression Level',
+          default: 85,
+          min: 1,
+          max: 100,
+        },
+      },
+      inputs: {
+        accept: ['image/jpeg', 'image/jpg', 'image/png', 'image/tiff'],
+        maxSize: 20 * 1024 * 1024, // 20MB
         multiple: true,
       },
     },
