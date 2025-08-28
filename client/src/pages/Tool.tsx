@@ -83,8 +83,7 @@ export default function Tool() {
           spec.category = galleryTool.category;
         } else {
           // For dynamically generated tools, we need a better strategy
-          // For now, let's create a fallback tool that shows this is a generated tool
-          console.log('Tool ID not found in mockToolSpecs or galleryTools:', toolId);
+          // For now, let's create a fallback tool
           spec = {
             id: toolId || 'fallback',
             name: 'Generated Tool',

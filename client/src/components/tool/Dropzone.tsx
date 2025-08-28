@@ -1,8 +1,14 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, X, FileIcon } from "lucide-react";
+import { Upload, X, FileIcon, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatBytes } from "@/lib/utils";
+
+interface FileWithPreview {
+  file: File;
+  preview?: string;
+  dimensions?: { width: number; height: number };
+}
 
 interface DropzoneProps {
   accept: string[];
@@ -14,6 +20,12 @@ interface DropzoneProps {
 
 export default function Dropzone({ accept, maxSize, multiple, files, onFilesChange }: DropzoneProps) {
   const [error, setError] = useState<string | null>(null);
+  const [filesWithPreviews, setFilesWithPreviews] = useState<FileWithPreview[]>([]);
+
+  // Check if this is an image/video tool based on accept types
+  const isMediaTool = accept.some(type => 
+    type.includes('image') || type.includes('video') || type === '.gif' || type === '.png' || type === '.jpg' || type === '.jpeg'
+  );
 
   const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any[]) => {
     setError(null);
@@ -41,6 +53,50 @@ export default function Dropzone({ accept, maxSize, multiple, files, onFilesChan
     maxSize,
     multiple,
   });
+
+  // Generate previews for image files
+  useEffect(() => {
+    const generatePreviews = async () => {
+      if (!isMediaTool) {
+        setFilesWithPreviews(files.map(file => ({ file })));
+        return;
+      }
+
+      const previews = await Promise.all(
+        files.map(async (file) => {
+          if (file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.gif')) {
+            try {
+              const preview = URL.createObjectURL(file);
+              const dimensions = await getImageDimensions(preview);
+              return { file, preview, dimensions };
+            } catch (error) {
+              return { file };
+            }
+          }
+          return { file };
+        })
+      );
+      setFilesWithPreviews(previews);
+    };
+
+    generatePreviews();
+
+    // Cleanup object URLs on unmount or file change
+    return () => {
+      filesWithPreviews.forEach(({ preview }) => {
+        if (preview) URL.revokeObjectURL(preview);
+      });
+    };
+  }, [files, isMediaTool]);
+
+  const getImageDimensions = (src: string): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      img.onerror = reject;
+      img.src = src;
+    });
+  };
 
   const removeFile = (index: number) => {
     onFilesChange(files.filter((_, i) => i !== index));
@@ -96,35 +152,79 @@ export default function Dropzone({ accept, maxSize, multiple, files, onFilesChan
       )}
 
       {/* File List */}
-      {files.length > 0 && (
-        <div className="space-y-2">
-          {files.map((file, index) => (
-            <div
-              key={`${file.name}-${index}`}
-              className="flex items-center justify-between p-3 bg-card rounded-lg border border-border"
-            >
-              <div className="flex items-center space-x-3">
-                <FileIcon className="text-primary w-5 h-5" />
-                <div>
-                  <div className="font-medium text-foreground truncate max-w-[200px]" title={file.name}>
-                    {file.name}
+      {filesWithPreviews.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-foreground">Uploaded Files ({filesWithPreviews.length})</h4>
+          <div className="space-y-3">
+            {filesWithPreviews.map(({ file, preview, dimensions }, index) => (
+              <div
+                key={`${file.name}-${index}`}
+                className="flex items-start justify-between p-4 bg-card rounded-lg border border-border hover:bg-muted/30 transition-colors"
+              >
+                <div className="flex items-start space-x-4 flex-1 min-w-0">
+                  {/* Preview or Icon */}
+                  <div className="flex-shrink-0">
+                    {preview ? (
+                      <div className="relative group">
+                        <img
+                          src={preview}
+                          alt={file.name}
+                          className="w-16 h-16 object-cover rounded-lg border border-border"
+                        />
+                        {file.name.toLowerCase().endsWith('.gif') && (
+                          <div className="absolute inset-0 bg-black/20 rounded-lg flex items-center justify-center">
+                            <span className="text-xs font-bold text-white bg-black/50 px-1.5 py-0.5 rounded">GIF</span>
+                          </div>
+                        )}
+                      </div>
+                    ) : file.type.startsWith('image/') ? (
+                      <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <ImageIcon className="text-primary w-6 h-6" />
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <FileIcon className="text-primary w-6 h-6" />
+                      </div>
+                    )}
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {formatBytes(file.size)} • Modified {new Date(file.lastModified).toLocaleTimeString()}
+
+                  {/* File Details */}
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="font-medium text-foreground truncate" title={file.name}>
+                      {file.name}
+                    </div>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <div className="flex items-center space-x-3">
+                        <span>{formatBytes(file.size)}</span>
+                        <span>•</span>
+                        <span>{file.type || 'Unknown type'}</span>
+                        {dimensions && (
+                          <>
+                            <span>•</span>
+                            <span>{dimensions.width} × {dimensions.height}px</span>
+                          </>
+                        )}
+                      </div>
+                      <div className="text-xs">
+                        Modified {new Date(file.lastModified).toLocaleString()}
+                      </div>
+                    </div>
                   </div>
                 </div>
+
+                {/* Remove Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeFile(index)}
+                  className="p-1.5 hover:bg-destructive/10 rounded transition-colors text-muted-foreground hover:text-destructive flex-shrink-0"
+                  data-testid={`remove-file-${index}`}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removeFile(index)}
-                className="p-1 hover:bg-muted rounded transition-colors text-muted-foreground hover:text-destructive"
-                data-testid={`remove-file-${index}`}
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>

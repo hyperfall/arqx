@@ -51,12 +51,10 @@ export default function Composer({
   const handleExampleClick = (exampleText: string) => {
     // Direct tool generation and navigation for quick examples
     const toolSpec = generateToolFromText(exampleText);
-    console.log('Generated tool for pills:', { text: exampleText, toolSpec });
     
     if (onSubmit) {
       onSubmit(exampleText, toolSpec);
     } else {
-      console.log('Navigating to:', `/t/${toolSpec.id}`);
       navigate(`/t/${toolSpec.id}`);
       if (variant === "center") {
         setComposerDocked(true);
