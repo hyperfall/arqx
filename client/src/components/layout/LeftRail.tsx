@@ -32,7 +32,7 @@ export default function LeftRail() {
         className={cn(
           "relative group flex items-center gap-3 h-12 px-4 text-sm justify-start transition-all duration-200",
           active 
-            ? "bg-[color:var(--card)] text-foreground shadow-lg rounded-l-xl mr-[-12px] pr-8 relative z-10 rounded-r-xl" 
+            ? "bg-[color:var(--card)] text-foreground rounded-l-xl mr-[-24px] pr-12 relative z-10" 
             : "hover:bg-white/60 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground rounded-xl w-full",
           isRailCollapsed && "px-3 justify-center"
         )}
@@ -41,6 +41,13 @@ export default function LeftRail() {
         <Icon className="w-4 h-4 flex-shrink-0" />
         {!isRailCollapsed && <span className="truncate">{label}</span>}
         
+        {/* Connection extension for active item */}
+        {active && !isRailCollapsed && (
+          <div 
+            aria-hidden
+            className="absolute right-[-24px] top-0 bottom-0 w-6 bg-[color:var(--card)] rounded-r-xl z-0"
+          />
+        )}
       </Button>
     );
 
