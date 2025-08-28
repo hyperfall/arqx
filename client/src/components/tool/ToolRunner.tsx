@@ -144,13 +144,13 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-5">
       {/* Input Files Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Input Files</CardTitle>
+      <Card className="w-full">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Input Files</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <Dropzone
             accept={toolSpec.inputs.accept}
             maxSize={toolSpec.inputs.maxSize}
@@ -162,11 +162,11 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
       </Card>
 
       {/* Settings Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Settings</CardTitle>
+      <Card className="w-full">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Settings</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="pt-0 space-y-4">
           {Object.entries(toolSpec.settings).map(([key, setting]) => 
             renderSetting(key, setting)
           )}
@@ -174,15 +174,15 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
       </Card>
 
       {/* Run Card */}
-      <Card>
-        <CardContent className="p-6">
+      <Card className="w-full">
+        <CardContent className="p-5">
           <ProgressBar isVisible={isRunning} progress={progress} />
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-semibold text-foreground">
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-foreground">
                 {isRunning ? `Processing... ${Math.round(progress)}%` : "Ready to Process"}
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {isRunning 
                   ? "Please wait while we process your files" 
                   : "Click run to start processing your files"
@@ -192,7 +192,7 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
             <Button
               onClick={handleRun}
               disabled={files.length === 0 || isRunning}
-              className={`px-8 py-3 rounded-lg font-medium transition-colors focus-ring flex items-center space-x-2 ${
+              className={`px-6 py-2.5 rounded-lg font-medium transition-colors focus-ring flex items-center space-x-2 ${
                 progress === 100 
                   ? "bg-green-500 hover:bg-green-600 text-white" 
                   : "bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -221,11 +221,11 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
       </Card>
 
       {/* Output Files Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Output Files</CardTitle>
+      <Card className="w-full">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Output Files</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <OutputList files={outputFiles} />
         </CardContent>
       </Card>

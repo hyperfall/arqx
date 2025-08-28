@@ -155,59 +155,74 @@ export default function Dropzone({ accept, maxSize, multiple, files, onFilesChan
       {filesWithPreviews.length > 0 && (
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-foreground">Uploaded Files ({filesWithPreviews.length})</h4>
-          <div className="space-y-3">
-            {filesWithPreviews.map(({ file, preview, dimensions }, index) => (
+          
+          {/* Image Previews Section */}
+          {isMediaTool && filesWithPreviews.some(({ preview }) => preview) && (
+            <div className="mb-4">
+              <div className="flex flex-wrap gap-3 p-3 bg-muted/20 rounded-lg border border-border/50">
+                {filesWithPreviews.filter(({ preview }) => preview).map(({ file, preview, dimensions }, index) => (
+                  <div key={`preview-${file.name}-${index}`} className="relative group">
+                    <img
+                      src={preview}
+                      alt={file.name}
+                      className="w-20 h-20 object-cover rounded-lg border-2 border-border hover:border-primary/50 transition-colors cursor-pointer"
+                      title={`${file.name}${dimensions ? ` • ${dimensions.width} × ${dimensions.height}px` : ''}`}
+                    />
+                    {file.name.toLowerCase().endsWith('.gif') && (
+                      <div className="absolute top-1 right-1">
+                        <span className="text-xs font-bold text-white bg-black/70 px-1.5 py-0.5 rounded">GIF</span>
+                      </div>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeFile(filesWithPreviews.findIndex(f => f.file === file))}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* File Details List */}
+          <div className="space-y-2">
+            {filesWithPreviews.map(({ file, dimensions }, index) => (
               <div
                 key={`${file.name}-${index}`}
-                className="flex items-start justify-between p-4 bg-card rounded-lg border border-border hover:bg-muted/30 transition-colors"
+                className="flex items-center justify-between p-3 bg-card/50 rounded-lg border border-border/30 hover:bg-muted/20 transition-colors"
               >
-                <div className="flex items-start space-x-4 flex-1 min-w-0">
-                  {/* Preview or Icon */}
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  {/* File Icon */}
                   <div className="flex-shrink-0">
-                    {preview ? (
-                      <div className="relative group">
-                        <img
-                          src={preview}
-                          alt={file.name}
-                          className="w-16 h-16 object-cover rounded-lg border border-border"
-                        />
-                        {file.name.toLowerCase().endsWith('.gif') && (
-                          <div className="absolute inset-0 bg-black/20 rounded-lg flex items-center justify-center">
-                            <span className="text-xs font-bold text-white bg-black/50 px-1.5 py-0.5 rounded">GIF</span>
-                          </div>
-                        )}
-                      </div>
-                    ) : file.type.startsWith('image/') ? (
-                      <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <ImageIcon className="text-primary w-6 h-6" />
+                    {file.type.startsWith('image/') ? (
+                      <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center">
+                        <ImageIcon className="text-primary w-4 h-4" />
                       </div>
                     ) : (
-                      <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <FileIcon className="text-primary w-6 h-6" />
+                      <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center">
+                        <FileIcon className="text-primary w-4 h-4" />
                       </div>
                     )}
                   </div>
 
-                  {/* File Details */}
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="font-medium text-foreground truncate" title={file.name}>
+                  {/* File Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-foreground truncate text-sm" title={file.name}>
                       {file.name}
                     </div>
-                    <div className="space-y-1 text-sm text-muted-foreground">
-                      <div className="flex items-center space-x-3">
-                        <span>{formatBytes(file.size)}</span>
-                        <span>•</span>
-                        <span>{file.type || 'Unknown type'}</span>
-                        {dimensions && (
-                          <>
-                            <span>•</span>
-                            <span>{dimensions.width} × {dimensions.height}px</span>
-                          </>
-                        )}
-                      </div>
-                      <div className="text-xs">
-                        Modified {new Date(file.lastModified).toLocaleString()}
-                      </div>
+                    <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                      <span>{formatBytes(file.size)}</span>
+                      <span>•</span>
+                      <span>{file.type || 'Unknown'}</span>
+                      {dimensions && (
+                        <>
+                          <span>•</span>
+                          <span>{dimensions.width} × {dimensions.height}px</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -217,10 +232,10 @@ export default function Dropzone({ accept, maxSize, multiple, files, onFilesChan
                   variant="ghost"
                   size="icon"
                   onClick={() => removeFile(index)}
-                  className="p-1.5 hover:bg-destructive/10 rounded transition-colors text-muted-foreground hover:text-destructive flex-shrink-0"
+                  className="w-7 h-7 hover:bg-destructive/10 rounded transition-colors text-muted-foreground hover:text-destructive flex-shrink-0"
                   data-testid={`remove-file-${index}`}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3 h-3" />
                 </Button>
               </div>
             ))}
