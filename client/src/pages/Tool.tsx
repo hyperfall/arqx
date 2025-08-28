@@ -74,7 +74,7 @@ export default function Tool() {
       // Get tool spec
       let spec = mockToolSpecs[toolId];
       if (!spec) {
-        // Generate from fastlane if not found
+        // Check if it's a gallery tool first
         const galleryTool = galleryTools.find(t => t.id === toolId);
         if (galleryTool) {
           spec = generateToolFromText(galleryTool.name);
@@ -82,7 +82,29 @@ export default function Tool() {
           spec.description = galleryTool.description;
           spec.category = galleryTool.category;
         } else {
-          spec = generateToolFromText("text formatter");
+          // For dynamically generated tools, we need a better strategy
+          // For now, let's create a fallback tool that shows this is a generated tool
+          console.log('Tool ID not found in mockToolSpecs or galleryTools:', toolId);
+          spec = {
+            id: toolId || 'fallback',
+            name: 'Generated Tool',
+            description: 'This is a dynamically generated tool',
+            category: 'Text',
+            icon: 'type',
+            settings: {
+              operation: {
+                type: 'select',
+                label: 'Operation',
+                default: 'lowercase',
+                options: ['lowercase', 'uppercase', 'capitalize', 'trim'],
+              },
+            },
+            inputs: {
+              accept: ['text/plain'],
+              maxSize: 5 * 1024 * 1024,
+              multiple: true,
+            },
+          };
         }
       }
       
