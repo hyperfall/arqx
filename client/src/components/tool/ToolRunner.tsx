@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,9 +28,60 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [outputFiles, setOutputFiles] = useState<Array<{ name: string; size: number; url: string }>>([]);
+  const [previewFiles, setPreviewFiles] = useState<Array<{ file: File; preview: string; dimensions?: { width: number; height: number } }>>([]);
 
   const handleSettingChange = (key: string, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Check if this is a tool that accepts images/videos
+  const isMediaTool = toolSpec.inputs.accept.some(type => 
+    type.includes('image') || type.includes('video') || type === '.gif' || type === '.png' || type === '.jpg' || type === '.jpeg'
+  );
+
+  // Generate previews for image/gif files
+  useEffect(() => {
+    const generatePreviews = async () => {
+      if (!isMediaTool) {
+        setPreviewFiles([]);
+        return;
+      }
+
+      const previews = await Promise.all(
+        files.map(async (file) => {
+          if (file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.gif')) {
+            try {
+              const preview = URL.createObjectURL(file);
+              const dimensions = await getImageDimensions(preview);
+              return { file, preview, dimensions };
+            } catch (error) {
+              return null;
+            }
+          }
+          return null;
+        })
+      );
+      
+      setPreviewFiles(previews.filter(Boolean) as Array<{ file: File; preview: string; dimensions?: { width: number; height: number } }>);
+    };
+
+    generatePreviews();
+
+    // Cleanup object URLs when component unmounts or files change
+    return () => {
+      previewFiles.forEach(({ preview }) => {
+        URL.revokeObjectURL(preview);
+      });
+    };
+  }, [files, isMediaTool]);
+
+  const getImageDimensions = (src: string): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      img.onerror = reject;
+      img.src = src;
+    });
   };
 
   const handleRun = async () => {
@@ -177,8 +228,48 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
           </Card>
         </div>
 
-        {/* Right Column: Ready to Process and Output Files */}
+        {/* Right Column: Preview, Ready to Process and Output Files */}
         <div className="space-y-5">
+          {/* Preview Card - Shows when there are image/gif previews */}
+          {previewFiles.length > 0 && (
+            <Card className="w-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Preview</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {previewFiles.map(({ file, preview, dimensions }, index) => (
+                    <div key={`preview-${file.name}-${index}`} className="relative group">
+                      <div className="aspect-square rounded-lg overflow-hidden border-2 border-border hover:border-primary/50 transition-colors bg-muted/20">
+                        <img
+                          src={preview}
+                          alt={file.name}
+                          className="w-full h-full object-cover cursor-pointer"
+                          title={`${file.name}${dimensions ? ` • ${dimensions.width} × ${dimensions.height}px` : ''}`}
+                        />
+                      </div>
+                      {file.name.toLowerCase().endsWith('.gif') && (
+                        <div className="absolute top-2 right-2">
+                          <span className="text-xs font-bold text-white bg-black/70 px-2 py-1 rounded-md">GIF</span>
+                        </div>
+                      )}
+                      <div className="mt-2 text-center">
+                        <p className="text-xs text-muted-foreground truncate" title={file.name}>
+                          {file.name}
+                        </p>
+                        {dimensions && (
+                          <p className="text-xs text-muted-foreground">
+                            {dimensions.width} × {dimensions.height}px
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Run Card */}
           <Card className="w-full">
             <CardContent className="p-5">
