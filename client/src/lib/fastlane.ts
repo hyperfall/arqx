@@ -250,7 +250,7 @@ export function generateToolFromText(input: string): ToolSpec {
   for (const template of toolTemplates) {
     if (template.regex.test(input)) {
       return {
-        id: generateToolId(),
+        id: generateToolId(input + template.spec.name),
         ...template.spec,
       };
     }
@@ -258,11 +258,26 @@ export function generateToolFromText(input: string): ToolSpec {
 
   // Return fallback if no match
   return {
-    id: generateToolId(),
+    id: generateToolId(input + fallbackSpec.name),
     ...fallbackSpec,
   };
 }
 
-function generateToolId(): string {
+function generateToolId(input?: string): string {
+  if (input) {
+    // Generate consistent ID based on input text for better deduplication
+    const hash = input.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    return `tool_${hash.slice(0, 12)}_${Math.abs(hashCode(input)).toString(36)}`;
+  }
   return `tool_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+function hashCode(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
 }

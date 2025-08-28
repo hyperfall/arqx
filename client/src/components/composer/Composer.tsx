@@ -14,9 +14,9 @@ interface ComposerProps {
 }
 
 const quickExamples = [
-  { icon: "🖼️", text: "PNG→JPG", description: "Convert PNG to JPEG" },
+  { icon: "🖼️", text: "Convert PNG to JPEG", description: "Convert PNG to JPEG" },
   { icon: "📄", text: "Merge PDF", description: "Combine PDF files" },
-  { icon: "🎬", text: "Extract Frames", description: "Get frames from video" },
+  { icon: "🎬", text: "Extract frames", description: "Get frames from video" },
   { icon: "🧹", text: "Strip EXIF", description: "Remove image metadata" },
 ];
 
@@ -48,8 +48,21 @@ export default function Composer({
     setInput("");
   };
 
-  const handleExampleClick = (example: string) => {
-    setInput(example);
+  const handleExampleClick = (exampleText: string) => {
+    setInput(exampleText);
+    // Auto-submit for quick examples
+    setTimeout(() => {
+      const toolSpec = generateToolFromText(exampleText);
+      if (onSubmit) {
+        onSubmit(exampleText, toolSpec);
+      } else {
+        navigate(`/t/${toolSpec.id}`);
+        if (variant === "center") {
+          setComposerDocked(true);
+        }
+      }
+      setInput("");
+    }, 100);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
