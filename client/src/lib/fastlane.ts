@@ -246,12 +246,9 @@ const fallbackSpec: Omit<ToolSpec, 'id'> = {
 };
 
 export function generateToolFromText(input: string): ToolSpec {
-  console.log('Generating tool from text:', input);
-  
   // Find matching template
   for (const template of toolTemplates) {
     if (template.regex.test(input)) {
-      console.log('Found matching template:', template.spec.name);
       return {
         id: generateToolId(input + template.spec.name),
         ...template.spec,
@@ -260,7 +257,6 @@ export function generateToolFromText(input: string): ToolSpec {
   }
 
   // Return fallback if no match
-  console.log('No match found, using fallback');
   return {
     id: generateToolId(input + fallbackSpec.name),
     ...fallbackSpec,

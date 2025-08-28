@@ -49,20 +49,16 @@ export default function Composer({
   };
 
   const handleExampleClick = (exampleText: string) => {
-    setInput(exampleText);
-    // Auto-submit for quick examples
-    setTimeout(() => {
-      const toolSpec = generateToolFromText(exampleText);
-      if (onSubmit) {
-        onSubmit(exampleText, toolSpec);
-      } else {
-        navigate(`/t/${toolSpec.id}`);
-        if (variant === "center") {
-          setComposerDocked(true);
-        }
+    // Direct tool generation and navigation for quick examples
+    const toolSpec = generateToolFromText(exampleText);
+    if (onSubmit) {
+      onSubmit(exampleText, toolSpec);
+    } else {
+      navigate(`/t/${toolSpec.id}`);
+      if (variant === "center") {
+        setComposerDocked(true);
       }
-      setInput("");
-    }, 100);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
