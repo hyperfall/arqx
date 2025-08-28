@@ -33,10 +33,10 @@ function AppLayout() {
   useKeyboard();
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-hidden h-screen flex flex-col">
       <TopBar />
-      <div className="pt-16">
-        <div className="grid grid-cols-[260px_1fr] xl:grid-cols-[260px_minmax(860px,1fr)] gap-5 px-6 py-6 min-h-screen">
+      <div className="flex-1 pt-16 overflow-hidden">
+        <div className="grid grid-cols-[260px_1fr] xl:grid-cols-[260px_minmax(860px,1fr)] gap-5 px-6 py-6 h-full">
           <LeftRail />
           <MainCard>
             <Router />

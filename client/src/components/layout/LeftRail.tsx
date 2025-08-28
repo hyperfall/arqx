@@ -70,7 +70,7 @@ export default function LeftRail() {
   return (
     <aside 
       className={cn(
-        "sticky top-6 h-[calc(100vh-96px)] rounded-2xl bg-[color:var(--rail)] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] ring-1 ring-black/5 overflow-visible dark:ring-white/10 transition-all duration-200",
+        "h-full rounded-2xl bg-[color:var(--rail)] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] ring-1 ring-black/5 overflow-visible dark:ring-white/10 transition-all duration-200 flex flex-col",
         isRailCollapsed ? "w-[72px]" : "w-64"
       )}
       data-testid="left-rail"
@@ -89,7 +89,7 @@ export default function LeftRail() {
       </div>
 
       {/* Navigation */}
-      <ScrollArea className="h-full overflow-y-auto">
+      <ScrollArea className="flex-1 overflow-y-auto">
         <nav className="p-4 space-y-2" role="navigation">
           {navItems.map((item) => (
             <NavItem
