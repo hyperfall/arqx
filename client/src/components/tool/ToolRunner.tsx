@@ -237,10 +237,10 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
                 <CardTitle className="text-lg">Preview</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {previewFiles.map(({ file, preview, dimensions }, index) => (
                     <div key={`preview-${file.name}-${index}`} className="relative group">
-                      <div className="aspect-square rounded-lg overflow-hidden border-2 border-border hover:border-primary/50 transition-colors bg-muted/20">
+                      <div className="aspect-video rounded-lg overflow-hidden border-2 border-border hover:border-primary/50 transition-colors bg-muted/20">
                         <img
                           src={preview}
                           alt={file.name}
@@ -249,19 +249,25 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
                         />
                       </div>
                       {file.name.toLowerCase().endsWith('.gif') && (
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-3 right-3">
                           <span className="text-xs font-bold text-white bg-black/70 px-2 py-1 rounded-md">GIF</span>
                         </div>
                       )}
-                      <div className="mt-2 text-center">
-                        <p className="text-xs text-muted-foreground truncate" title={file.name}>
+                      <div className="mt-3 space-y-1">
+                        <p className="text-sm font-medium text-foreground truncate" title={file.name}>
                           {file.name}
                         </p>
-                        {dimensions && (
-                          <p className="text-xs text-muted-foreground">
-                            {dimensions.width} × {dimensions.height}px
-                          </p>
-                        )}
+                        <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                          <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                          <span>•</span>
+                          <span>{file.type || 'Unknown'}</span>
+                          {dimensions && (
+                            <>
+                              <span>•</span>
+                              <span>{dimensions.width} × {dimensions.height}px</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

@@ -156,40 +156,9 @@ export default function Dropzone({ accept, maxSize, multiple, files, onFilesChan
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-foreground">Uploaded Files ({filesWithPreviews.length})</h4>
           
-          {/* Image Previews Section */}
-          {isMediaTool && filesWithPreviews.some(({ preview }) => preview) && (
-            <div className="mb-4">
-              <div className="flex flex-wrap gap-3 p-3 bg-muted/20 rounded-lg border border-border/50">
-                {filesWithPreviews.filter(({ preview }) => preview).map(({ file, preview, dimensions }, index) => (
-                  <div key={`preview-${file.name}-${index}`} className="relative group">
-                    <img
-                      src={preview}
-                      alt={file.name}
-                      className="w-20 h-20 object-cover rounded-lg border-2 border-border hover:border-primary/50 transition-colors cursor-pointer"
-                      title={`${file.name}${dimensions ? ` • ${dimensions.width} × ${dimensions.height}px` : ''}`}
-                    />
-                    {file.name.toLowerCase().endsWith('.gif') && (
-                      <div className="absolute top-1 right-1">
-                        <span className="text-xs font-bold text-white bg-black/70 px-1.5 py-0.5 rounded">GIF</span>
-                      </div>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeFile(filesWithPreviews.findIndex(f => f.file === file))}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* File Details List */}
+          {/* Simple File Names List */}
           <div className="space-y-2">
-            {filesWithPreviews.map(({ file, dimensions }, index) => (
+            {filesWithPreviews.map(({ file }, index) => (
               <div
                 key={`${file.name}-${index}`}
                 className="flex items-center justify-between p-3 bg-card/50 rounded-lg border border-border/30 hover:bg-muted/20 transition-colors"
@@ -208,21 +177,10 @@ export default function Dropzone({ accept, maxSize, multiple, files, onFilesChan
                     )}
                   </div>
 
-                  {/* File Info */}
+                  {/* File Name Only */}
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-foreground truncate text-sm" title={file.name}>
                       {file.name}
-                    </div>
-                    <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                      <span>{formatBytes(file.size)}</span>
-                      <span>•</span>
-                      <span>{file.type || 'Unknown'}</span>
-                      {dimensions && (
-                        <>
-                          <span>•</span>
-                          <span>{dimensions.width} × {dimensions.height}px</span>
-                        </>
-                      )}
                     </div>
                   </div>
                 </div>
