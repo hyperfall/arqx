@@ -200,4 +200,16 @@
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  /* Text selection styles for light theme */
+  ::selection {
+    background-color: hsl(212, 100%, 50%);
+    color: hsl(0, 0%, 100%);
+  }
+
+  /* Text selection styles for dark theme */
+  .dark ::selection {
+    background-color: hsl(212, 100%, 60%);
+    color: hsl(0, 0%, 98%);
+  }
 }
