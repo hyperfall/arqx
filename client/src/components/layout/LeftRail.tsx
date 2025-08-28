@@ -30,10 +30,10 @@ export default function LeftRail() {
         variant="ghost"
         onClick={() => navigate(href)}
         className={cn(
-          "relative group flex items-center gap-3 h-12 px-4 rounded-xl text-sm justify-start w-full",
+          "relative group flex items-center gap-3 h-12 px-4 text-sm justify-start w-full transition-all duration-200",
           active 
-            ? "bg-gradient-to-r from-violet-500/20 to-violet-500/10 text-violet-700 ring-1 ring-violet-500/30" 
-            : "hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground",
+            ? "bg-[color:var(--card)] text-foreground shadow-lg rounded-l-xl" 
+            : "hover:bg-white/60 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground rounded-xl",
           isRailCollapsed && "px-3 justify-center"
         )}
         data-testid={`nav-${label.toLowerCase().replace(/\s+/g, '-')}`}
@@ -41,12 +41,18 @@ export default function LeftRail() {
         <Icon className="w-4 h-4 flex-shrink-0" />
         {!isRailCollapsed && <span className="truncate">{label}</span>}
         
-        {/* Connector nub for active item */}
+        {/* Seamless connection to main card for active item */}
         {active && !isRailCollapsed && (
-          <span 
-            aria-hidden
-            className="absolute right-[-16px] top-1/2 -translate-y-1/2 w-4 h-10 bg-[color:var(--card)] rounded-r-xl shadow-[0_0_0_1px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)] z-20"
-          />
+          <>
+            <span 
+              aria-hidden
+              className="absolute right-0 top-0 bottom-0 w-4 bg-[color:var(--card)] z-10"
+            />
+            <span 
+              aria-hidden
+              className="absolute right-[-4px] top-0 bottom-0 w-4 bg-[color:var(--card)] rounded-r-xl shadow-lg z-10"
+            />
+          </>
         )}
       </Button>
     );
@@ -70,18 +76,18 @@ export default function LeftRail() {
   return (
     <aside 
       className={cn(
-        "h-full rounded-2xl bg-[color:var(--rail)] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] ring-1 ring-black/5 overflow-visible dark:ring-white/10 transition-all duration-200 flex flex-col",
+        "h-full overflow-visible transition-all duration-200 flex flex-col",
         isRailCollapsed ? "w-[72px]" : "w-64"
       )}
       data-testid="left-rail"
     >
       {/* Rail Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border/50">
+      <div className="flex items-center justify-between p-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleRail}
-          className="hover:bg-muted rounded-lg transition-colors focus-ring"
+          className="hover:bg-white/80 dark:hover:bg-white/10 rounded-lg transition-colors focus-ring"
           data-testid="rail-toggle"
         >
           <Menu className="w-4 h-4 text-muted-foreground" />
@@ -104,7 +110,7 @@ export default function LeftRail() {
 
         {/* Bottom Section */}
         {isAuthenticated && (
-          <div className="p-4 border-t border-border/50 mt-auto">
+          <div className="p-4 mt-auto">
             {isRailCollapsed ? (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -112,7 +118,7 @@ export default function LeftRail() {
                     variant="ghost"
                     size="icon"
                     onClick={signOut}
-                    className="hover:bg-muted hover:text-destructive rounded-lg transition-colors focus-ring"
+                    className="hover:bg-white/60 dark:hover:bg-white/10 hover:text-destructive rounded-lg transition-colors focus-ring"
                     data-testid="sign-out-button"
                   >
                     <LogOut className="w-4 h-4" />
@@ -126,7 +132,7 @@ export default function LeftRail() {
               <Button
                 variant="ghost"
                 onClick={signOut}
-                className="flex items-center space-x-3 px-3 py-2 rounded-xl text-sm w-full justify-start hover:bg-muted hover:text-destructive transition-colors focus-ring"
+                className="flex items-center space-x-3 px-3 py-2 rounded-xl text-sm w-full justify-start hover:bg-white/60 dark:hover:bg-white/10 hover:text-destructive transition-colors focus-ring"
                 data-testid="sign-out-button"
               >
                 <LogOut className="w-4 h-4" />
