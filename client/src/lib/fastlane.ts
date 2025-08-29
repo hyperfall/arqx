@@ -51,7 +51,7 @@ const viewerTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
       icon: 'file-text',
       settings: {},
       inputs: {
-        accept: ['application/pdf', '.pdf'],
+        accept: ['application/pdf'],
         maxSize: 50 * 1024 * 1024, // 50MB
         multiple: false,
       },
@@ -160,7 +160,7 @@ const viewerTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
       icon: 'table',
       settings: {},
       inputs: {
-        accept: ['text/csv', '.csv'],
+        accept: ['text/csv'],
         maxSize: 10 * 1024 * 1024, // 10MB
         multiple: false,
       },
@@ -196,7 +196,7 @@ const viewerTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
       icon: 'code',
       settings: {},
       inputs: {
-        accept: ['application/json', '.json'],
+        accept: ['application/json'],
         maxSize: 5 * 1024 * 1024, // 5MB
         multiple: false,
       },
@@ -381,7 +381,7 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
         },
       },
       inputs: {
-        accept: ['application/pdf', '.pdf'],
+        accept: ['application/pdf'],
         maxSize: 50 * 1024 * 1024, // 50MB
         multiple: true,
       },
@@ -473,7 +473,7 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
         },
       },
       inputs: {
-        accept: ['text/csv', 'application/json', '.csv', '.json'],
+        accept: ['text/csv', 'application/json'],
         maxSize: 10 * 1024 * 1024, // 10MB
         multiple: true,
       },
@@ -502,7 +502,7 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
         },
       },
       inputs: {
-        accept: ['text/plain', '.txt'],
+        accept: ['text/plain'],
         maxSize: 10 * 1024 * 1024, // 10MB
         multiple: true,
       },
@@ -561,7 +561,7 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
         },
       },
       inputs: {
-        accept: ['text/csv', 'application/json', 'text/xml', '.csv', '.json', '.xml'],
+        accept: ['text/csv', 'application/json', 'text/xml'],
         maxSize: 25 * 1024 * 1024, // 25MB
         multiple: true,
       },
@@ -713,7 +713,7 @@ const fallbackSpecs: Array<Omit<ToolSpec, 'id'>> = [
       },
     },
     inputs: {
-      accept: ['text/csv', 'application/json', '.csv', '.json', '.txt'],
+      accept: ['text/csv', 'application/json', 'text/plain'],
       maxSize: 15 * 1024 * 1024, // 15MB
       multiple: true,
     },

@@ -43,12 +43,6 @@ export default function WidgetHost({ widget }: WidgetHostProps) {
   const context = useWidgetContext();
   const WidgetComponent = getWidgetComponent(widget.type);
 
-  // Debug context
-  console.log('WidgetHost context:', { 
-    hasGetInput: !!context.getInput, 
-    contextKeys: Object.keys(context),
-    widgetType: widget.type 
-  });
 
   if (!WidgetComponent) {
     return <WidgetError error={`Unknown widget type: ${widget.type}`} title={widget.title} />;

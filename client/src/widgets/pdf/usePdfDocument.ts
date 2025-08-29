@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 
-// Set up PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Set up PDF.js worker - use a more reliable source
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 export interface PdfDocumentHook {
   document: any | null;
