@@ -721,32 +721,52 @@ const fallbackSpecs: Array<Omit<ToolSpec, 'id'>> = [
 ];
 
 export function generateToolFromText(input: string): ToolSpec {
+  console.log('🔧 Tool Generation Debug:', { input });
+  
   // Check viewer templates first (for live preview tools)
   for (const template of viewerTemplates) {
     if (template.regex.test(input)) {
-      return {
+      const toolSpec = {
         id: generateToolId(input + template.spec.name),
         ...template.spec,
       };
+      console.log('✅ Matched viewer template:', { 
+        templateName: template.spec.name, 
+        regex: template.regex.toString(), 
+        generatedId: toolSpec.id 
+      });
+      return toolSpec;
     }
   }
 
   // Find matching processing template
   for (const template of toolTemplates) {
     if (template.regex.test(input)) {
-      return {
+      const toolSpec = {
         id: generateToolId(input + template.spec.name),
         ...template.spec,
       };
+      console.log('✅ Matched tool template:', { 
+        templateName: template.spec.name, 
+        regex: template.regex.toString(), 
+        generatedId: toolSpec.id 
+      });
+      return toolSpec;
     }
   }
 
   // Select a fallback based on input characteristics for better variety
   const fallbackSpec = selectFallbackSpec(input);
-  return {
+  const toolSpec = {
     id: generateToolId(input + fallbackSpec.name),
     ...fallbackSpec,
   };
+  console.log('⚠️ Using fallback:', { 
+    fallbackName: fallbackSpec.name, 
+    input, 
+    generatedId: toolSpec.id 
+  });
+  return toolSpec;
 }
 
 function selectFallbackSpec(input: string): Omit<ToolSpec, 'id'> {
