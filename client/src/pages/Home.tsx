@@ -34,54 +34,53 @@ export default function Home() {
   return (
     <div data-testid="home-page">
       {/* Hero Section */}
-      <div className="text-center mb-12 animate-fade-in">
-        <h1 className="text-4xl font-bold text-foreground mb-4">
-          Build tools with natural language
-        </h1>
-        <p className="text-xl text-muted-foreground">
-          Describe what you want to build, and we'll generate a powerful tool for you instantly.
-        </p>
+      <div className="text-center mb-16 animate-fade-in">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+            Build tools with natural language
+          </h1>
+          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+            Describe what you want to build, and we'll generate a powerful tool for you instantly.
+          </p>
+        </div>
       </div>
 
       {/* Main Composer */}
-      <Composer variant="center" />
+      <div className="mb-20">
+        <Composer variant="center" />
+      </div>
 
       {/* Recent Tools Section */}
       {recentTools.length > 0 && (
-        <div className="border-t border-border pt-8 mt-16">
-          <h2 className="text-2xl font-semibold text-foreground mb-6">Recent Tools</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recentTools.slice(0, 6).map((tool) => (
+        <div className="border-t border-border pt-6 mt-12">
+          <h2 className="text-xl font-semibold text-foreground mb-4">Recent Tools</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            {recentTools.slice(0, 8).map((tool) => (
               <Card
-                key={tool.id}
+                key={`${tool.id}-${tool.name}`}
                 className="hover:bg-muted/50 transition-colors cursor-pointer group"
                 onClick={() => navigate(`/t/${tool.id}`)}
                 data-testid={`recent-tool-${tool.id}`}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-lg">
+                <CardContent className="p-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center text-sm">
                       {getIconEmoji(tool.icon)}
                     </div>
-                    <div>
-                      <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-foreground group-hover:text-primary transition-colors text-sm truncate">
                         {tool.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {formatTimeAgo(tool.lastUsed)}
                       </p>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {tool.description}
-                  </p>
                   <div className="flex items-center justify-between">
-                    <div className="flex space-x-2">
-                      <span className="px-2 py-1 text-xs bg-secondary rounded-full">
-                        {tool.category}
-                      </span>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <span className="px-2 py-1 text-xs bg-secondary rounded-full">
+                      {tool.category}
+                    </span>
+                    <ArrowRight className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
                 </CardContent>
               </Card>

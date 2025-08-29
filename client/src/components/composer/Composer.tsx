@@ -71,26 +71,26 @@ export default function Composer({
 
   if (variant === "center") {
     return (
-      <div className="max-w-2xl mx-auto mb-8 animate-slide-up">
+      <div className="max-w-3xl mx-auto mb-8 animate-slide-up">
         <form onSubmit={handleSubmit}>
-          <div className="relative">
+          <div className="relative group">
             <Textarea
               placeholder={placeholder}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full p-4 bg-muted/30 border border-border rounded-2xl text-foreground placeholder-muted-foreground resize-none focus-ring transition-all duration-200 min-h-[120px]"
+              className="w-full p-6 bg-background/80 backdrop-blur-sm border-2 border-border hover:border-primary/50 focus:border-primary/70 rounded-3xl text-foreground placeholder-muted-foreground resize-none transition-all duration-300 min-h-[140px] text-lg shadow-lg hover:shadow-xl focus:shadow-2xl"
               rows={4}
               data-testid="main-composer"
             />
-            <div className="absolute bottom-4 right-4 flex items-center space-x-2">
-              <div className="text-xs text-muted-foreground">Press Enter to submit</div>
+            <div className="absolute bottom-6 right-6 flex items-center space-x-3">
+              <div className="text-sm text-muted-foreground hidden sm:block">Press Enter to submit</div>
               <Button 
                 type="submit" 
-                className="bg-primary text-primary-foreground px-6 py-2 rounded-full font-medium hover:bg-primary/90 transition-colors focus-ring"
+                className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-8 py-3 rounded-full font-semibold hover:from-primary/90 hover:to-primary/70 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 focus:scale-105"
                 data-testid="generate-tool-button"
               >
-                <Send className="w-4 h-4 mr-2" />
+                <Send className="w-5 h-5 mr-2" />
                 Generate Tool
               </Button>
             </div>
@@ -98,16 +98,16 @@ export default function Composer({
         </form>
 
         {/* Quick Examples */}
-        <div className="flex flex-wrap justify-center gap-3 mt-6">
+        <div className="flex flex-wrap justify-center gap-4 mt-8">
           {quickExamples.map((example) => (
             <Button
               key={example.text}
               variant="secondary"
               onClick={() => handleExampleClick(example.text)}
-              className="px-4 py-2 rounded-full text-sm hover:bg-secondary/80 transition-colors focus-ring"
+              className="px-6 py-3 rounded-full text-sm font-medium hover:bg-secondary/80 hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg border border-border/50 hover:border-primary/50"
               data-testid={`example-${example.text.toLowerCase().replace(/\s+/g, '-')}`}
             >
-              <span className="mr-2">{example.icon}</span>
+              <span className="mr-2 text-base">{example.icon}</span>
               {example.text}
             </Button>
           ))}

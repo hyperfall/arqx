@@ -23,7 +23,8 @@ export const useRecentStore = create<RecentState>()(
       addRecentTool: (tool) => {
         const { recentTools } = get();
         const newTool = { ...tool, lastUsed: new Date().toISOString() };
-        const filtered = recentTools.filter(t => t.id !== tool.id);
+        // Remove duplicates based on both ID and name to handle different ID scenarios
+        const filtered = recentTools.filter(t => t.id !== tool.id && t.name !== tool.name);
         set({
           recentTools: [newTool, ...filtered].slice(0, 10), // Keep only 10 recent tools
         });
