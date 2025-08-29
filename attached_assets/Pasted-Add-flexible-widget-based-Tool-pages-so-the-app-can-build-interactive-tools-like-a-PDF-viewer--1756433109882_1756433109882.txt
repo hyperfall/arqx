@@ -1,0 +1,184 @@
+Add **flexible, widget-based Tool pages** so the app can build interactive tools like a “PDF viewer with live preview” (no run button) as well as classic converters. This must be driven by an extended ToolSpec and a **Widget Registry** so the UI adapts to any request.
+
+────────────────────────────────────────────────
+GOALS
+────────────────────────────────────────────────
+• Support tools that are **viewers/editors** (live, no “Run”) and **pipelines** (needs Run).
+• Example: “Create a PDF viewer with live preview and thumbnails” should render a full viewer immediately after a PDF is dropped.
+• Keep code portable (React + Router). No backend required; use browser libs only.
+• No overflows. Works within our existing left rail + rounded MainCard layout.
+
+────────────────────────────────────────────────
+DEPENDENCIES
+────────────────────────────────────────────────
+Install:
+- pdfjs-dist (PDF.js) for live PDF preview
+- react-virtuoso OR react-window (choose one) for virtualized page thumbs
+- (optional) @use-gesture/react for smooth zoom/pan, but basic scroll/zoom is enough
+
+Example:
+npm i pdfjs-dist react-virtuoso
+
+────────────────────────────────────────────────
+SPEC CHANGES (ToolSpec v1.1 – additive)
+────────────────────────────────────────────────
+Extend the ToolSpec with a `ui` section. Keep old tools working; `ui` is optional.
+
+type ToolSpecUI = {
+  mode?: "live" | "run";              // default "run"; "live" hides Run row
+  layout?: {
+    main: string[];                   // widget ids in render order
+    inspector?: string[];             // optional side widgets
+  };
+  widgets?: Array<{
+    id: string;                       // unique per tool
+    type: string;                     // e.g., "viewer.pdf", "viewer.image", "panel.fileDetails", "panel.outputFiles"
+    title?: string;
+    bindings?: Record<string, string>; // map widget props → ids in spec.inputs or preview stream, e.g. { file: "@pdf" }
+    options?: Record<string, any>;     // free-form widget opts
+  }>;
+};
+
+type ToolSpecV1_1 = ToolSpecV1 & { ui?: ToolSpecUI };
+
+Notes:
+• `mode:"live"` → show Input Files + viewer; hide Settings/Run by default (can be overridden).
+• `bindings` resolve ids: "@pdf" refers to an input with id "pdf".
+• Keep `inputs[]/pipeline/output` unchanged for converter tools.
+
+────────────────────────────────────────────────
+WIDGET REGISTRY
+────────────────────────────────────────────────
+Create a registry that maps a widget `type` to a React component. A <WidgetHost /> mounts by looking up type in the registry and passing props based on `bindings` + `options`.
+
+src/widgets/registry.ts
+export type WidgetProps = {
+  id: string;
+  title?: string;
+  bindings?: Record<string,string>;
+  options?: Record<string,any>;
+  ctx: WidgetContext; // see below
+};
+
+export type WidgetComponent = React.FC<WidgetProps>;
+export const WidgetRegistry: Record<string, WidgetComponent> = {
+  "viewer.pdf": PdfViewerWidget,
+  "panel.fileDetails": FileDetailsWidget,
+  "panel.outputFiles": OutputFilesWidget,
+  // add more: viewer.image, viewer.video, viewer.audio, viewer.text, table.csv, table.json, diff.text, markdown.preview, etc.
+};
+
+WidgetContext (passed via React context):
+type WidgetContext = {
+  // read current inputs and subscribe to changes
+  getInput: (id:string) => File|Blob|undefined;
+  onInputChange: (id:string, cb:(file?:File)=>void) => () => void;
+  // write transient UI state (page, zoom), persisted in tool session
+  getState: <T=any>(key:string, fallback:T)=>T;
+  setState: (key:string, value:any)=>void;
+  // fire UI events (for bindings/signals)
+  emit: (event:string, payload?:any)=>void;
+  on: (event:string, cb:(payload:any)=>void)=>()=>void;
+};
+
+Add a <WidgetHost widget={...} /> that resolves `bindings` into concrete props:
+- If a prop value starts with "@", it references an input id or a named stream (e.g., "@pdf", "@preview").
+- Host subscribes to input changes and re-renders the widget.
+
+────────────────────────────────────────────────
+PDF VIEWER WIDGET (live)
+────────────────────────────────────────────────
+Implement PdfViewerWidget with pdfjs-dist:
+- Props: { file?: File|Blob; options?: { showSidebar?:boolean; showThumbnails?:boolean; showSearch?:boolean; continuous?:boolean; } }
+- Behavior:
+  • When `file` is present, load via PDF.js; show first page immediately; render pages lazily on scroll.
+  • Provide controls: page number, prev/next, zoom in/out/reset, fit to width, search (basic text search across pages), optional thumbnails sidebar (virtualized list).
+  • Use CSS to ensure no overflows: container is overflow-hidden; inner viewer scrolls; thumbnails sidebar scrolls independently; maintain rounded card aesthetic.
+  • Keyboard: ArrowUp/Down scroll, Cmd/Ctrl+F focus search field, +/- zoom.
+  • Accessibility: announce page changes via aria-live, focusable controls with labels.
+
+Files:
+- src/widgets/pdf/PdfViewerWidget.tsx
+- src/widgets/pdf/pdfWorker.ts (set pdfjs.GlobalWorkerOptions.workerSrc)
+- src/widgets/pdf/usePdfDocument.ts (hook: load doc, render page canvases on demand, cache)
+
+Virtualization:
+- Thumbnails: render ~100px-wide images using page.render at low scale; list via react-virtuoso.
+- Main view: render pages on demand with IntersectionObserver; keep 2 pages above/below in cache.
+
+No “Run” button:
+- When a spec has ui.mode="live" and a widget of type "viewer.pdf" bound to "@pdf", Tool page should display Input Files + Viewer, and hide the Run card row by default.
+
+────────────────────────────────────────────────
+TOOL PAGE ADAPTER (flex)
+────────────────────────────────────────────────
+Update ToolRunner to:
+1) Read `spec.ui?.mode` ("live" | "run"), default "run".
+2) Render sections conditionally:
+   - Always show **Input Files**.
+   - If mode === "run": show Settings + Run card + Output Files.
+   - If mode === "live": render widgets per `ui.layout.main`, then optionally `ui.layout.inspector`. Do not show Run card unless spec explicitly wants it.
+3) Provide <WidgetContext> to children with current inputs + session state.
+4) Ensure the widget area is inside the MainCard and respects our padding/border radius; use overflow-hidden on the outer card and internal scroll on the viewer so nothing bleeds outside.
+
+Example rendering:
+{spec.ui?.layout?.main?.map(id => {
+  const w = spec.ui!.widgets!.find(x => x.id === id);
+  return <WidgetHost key={id} widget={w} context={ctx} />;
+})}
+
+────────────────────────────────────────────────
+FAST-LANE INTENT (add viewer types)
+────────────────────────────────────────────────
+Extend fastlane.ts to map viewer phrases to ToolSpec v1.1:
+
+“create a pdf viewer with live preview”
+→ {
+  version:"1",
+  name:"PDF Viewer",
+  summary:"View PDFs with zoom, thumbnails and search.",
+  inputs:[{ id:"pdf", type:"file", label:"PDF", accept:["application/pdf"], maxMB:100 }],
+  pipeline:[], output:{ type:"none" },  // no run pipeline
+  ui:{
+    mode:"live",
+    layout:{ main:["pdfMain"], inspector:["fileDetails"] },
+    widgets:[
+      { id:"pdfMain", type:"viewer.pdf", title:"Preview", bindings:{ file:"@pdf" }, options:{ showSidebar:true, showThumbnails:true, showSearch:true, continuous:true } },
+      { id:"fileDetails", type:"panel.fileDetails", title:"File Details", bindings:{ file:"@pdf" } }
+    ]
+  }
+}
+
+Also add mappings for “image viewer”, “audio player”, “video player”, “markdown preview”, “csv table viewer”.
+
+────────────────────────────────────────────────
+PANELS / GENERIC WIDGETS
+────────────────────────────────────────────────
+Add simple, reusable panels:
+- panel.fileDetails: shows name, type, size, pages (if PDF), last modified; copy metadata button.
+- panel.outputFiles: already exists for pipeline tools.
+- viewer.image: zoom/pan (Canvas), EXIF summary if available.
+- viewer.video: HTML5 video with controls; waveform later.
+- viewer.audio: HTML5 audio; basic waveform later.
+- viewer.text: large code editor/readonly area with line numbers (monospace).
+- table.csv / table.json: grid (lightweight), virtualized rows.
+
+────────────────────────────────────────────────
+LAYOUT + THEME CONSIDERATIONS
+────────────────────────────────────────────────
+• Viewer sections must never overflow the MainCard. Use:
+  .viewerRoot { height: min(75vh, 900px); border-radius: inherit; overflow: hidden; }
+  .viewerScroll { height: 100%; overflow: auto; }
+• Respect our BottomDock padding; when the dock is visible, the viewer’s scrollable area must subtract its height (use existing useDockPadding()).
+• Theme: use CSS vars for surface/border/text so widgets inherit style; keep rounded corners consistent.
+
+────────────────────────────────────────────────
+ACCEPTANCE
+────────────────────────────────────────────────
+✓ Typing “create a pdf viewer with live preview” generates a ToolSpec with ui.mode="live" and widgets.
+✓ Dropping a PDF shows a live viewer with zoom, page nav, thumbnails, and search. No Run button is shown.
+✓ Viewer is fully contained inside the main rounded card; no horizontal or vertical overflow. Thumbnails and main view scroll independently.
+✓ ToolRunner can render both viewer-type tools and classic converter tools using the same codepath.
+✓ Widget Registry exists and is documented; adding new widgets is a single-file addition + registry entry.
+✓ Fast-lane mappings exist for PDF/Image/Audio/Video/Markdown/CSV viewers.
+✓ Keyboard & a11y: controls have labels; page changes are announced via aria-live; Cmd/Ctrl+F focuses search.

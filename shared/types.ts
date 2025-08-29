@@ -1,3 +1,19 @@
+// Widget-based UI system types for ToolSpec v1.1
+export type ToolSpecUI = {
+  mode?: "live" | "run";              // default "run"; "live" hides Run row
+  layout?: {
+    main: string[];                   // widget ids in render order
+    inspector?: string[];             // optional side widgets
+  };
+  widgets?: Array<{
+    id: string;                       // unique per tool
+    type: string;                     // e.g., "viewer.pdf", "viewer.image", "panel.fileDetails"
+    title?: string;
+    bindings?: Record<string, string>; // map widget props → ids in spec.inputs or preview stream
+    options?: Record<string, any>;     // free-form widget opts
+  }>;
+};
+
 // Core ToolSpec v1 data model
 export type ToolSpec = {
   version: "1";
@@ -9,11 +25,12 @@ export type ToolSpec = {
     args?: Record<string, any>;
   }>;
   output: {
-    type: "file" | "file[]" | "text" | "json";
+    type: "file" | "file[]" | "text" | "json" | "none";
     naming?: string;
     zip?: boolean;
   };
   suggested_extras?: string[];
+  ui?: ToolSpecUI; // v1.1 extension
 };
 
 // Repository metadata

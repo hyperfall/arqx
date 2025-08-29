@@ -1,3 +1,21 @@
+// Widget UI types for FastLane ToolSpec
+export type FastLaneWidgetSpec = {
+  id: string;
+  type: string;
+  title?: string;
+  bindings?: Record<string, string>;
+  options?: Record<string, any>;
+};
+
+export type FastLaneUISpec = {
+  mode?: "live" | "run";
+  layout?: {
+    main: string[];
+    inspector?: string[];
+  };
+  widgets?: FastLaneWidgetSpec[];
+};
+
 export interface ToolSpec {
   id: string;
   name: string;
@@ -19,7 +37,193 @@ export interface ToolSpec {
     maxSize: number;
     multiple: boolean;
   };
+  ui?: FastLaneUISpec; // v1.1 extension
 }
+
+// Viewer tool templates for live preview mode
+const viewerTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
+  {
+    regex: /\b(pdf|document|read|view|preview)\b.*\b(pdf|document)\b/i,
+    spec: {
+      name: 'PDF Viewer',
+      description: 'View and navigate PDF documents with zoom, thumbnails, and search',
+      category: 'Viewer',
+      icon: 'file-text',
+      settings: {},
+      inputs: {
+        accept: ['application/pdf', '.pdf'],
+        maxSize: 50 * 1024 * 1024, // 50MB
+        multiple: false,
+      },
+      ui: {
+        mode: 'live',
+        layout: {
+          main: ['pdfViewer'],
+          inspector: ['fileDetails'],
+        },
+        widgets: [
+          {
+            id: 'pdfViewer',
+            type: 'viewer.pdf',
+            title: 'PDF Viewer',
+            bindings: { file: '@pdf' },
+            options: { showSidebar: true, showThumbnails: true, showSearch: true },
+          },
+          {
+            id: 'fileDetails',
+            type: 'panel.fileDetails',
+            title: 'File Details',
+            bindings: { file: '@file' },
+          },
+        ],
+      },
+    },
+  },
+  {
+    regex: /\b(image|photo|picture|jpg|png|gif|jpeg)\b.*\b(view|preview|show|display)\b/i,
+    spec: {
+      name: 'Image Viewer',
+      description: 'View and zoom images with detailed information',
+      category: 'Viewer',
+      icon: 'image',
+      settings: {},
+      inputs: {
+        accept: ['image/*'],
+        maxSize: 20 * 1024 * 1024, // 20MB
+        multiple: false,
+      },
+      ui: {
+        mode: 'live',
+        layout: {
+          main: ['imageViewer'],
+          inspector: ['fileDetails'],
+        },
+        widgets: [
+          {
+            id: 'imageViewer',
+            type: 'viewer.image',
+            title: 'Image Viewer',
+            bindings: { file: '@image' },
+          },
+          {
+            id: 'fileDetails',
+            type: 'panel.fileDetails',
+            title: 'File Details',
+            bindings: { file: '@file' },
+          },
+        ],
+      },
+    },
+  },
+  {
+    regex: /\b(video|movie|mp4|avi|mov)\b.*\b(view|play|preview|watch)\b/i,
+    spec: {
+      name: 'Video Player',
+      description: 'Play and preview video files',
+      category: 'Viewer',
+      icon: 'video',
+      settings: {},
+      inputs: {
+        accept: ['video/*'],
+        maxSize: 100 * 1024 * 1024, // 100MB
+        multiple: false,
+      },
+      ui: {
+        mode: 'live',
+        layout: {
+          main: ['videoViewer'],
+          inspector: ['fileDetails'],
+        },
+        widgets: [
+          {
+            id: 'videoViewer',
+            type: 'viewer.video',
+            title: 'Video Player',
+            bindings: { file: '@video' },
+          },
+          {
+            id: 'fileDetails',
+            type: 'panel.fileDetails',
+            title: 'File Details',
+            bindings: { file: '@file' },
+          },
+        ],
+      },
+    },
+  },
+  {
+    regex: /\b(csv|table|spreadsheet|data)\b.*\b(view|preview|show|display)\b/i,
+    spec: {
+      name: 'CSV Table Viewer',
+      description: 'View and explore CSV data in table format',
+      category: 'Viewer',
+      icon: 'table',
+      settings: {},
+      inputs: {
+        accept: ['text/csv', '.csv'],
+        maxSize: 10 * 1024 * 1024, // 10MB
+        multiple: false,
+      },
+      ui: {
+        mode: 'live',
+        layout: {
+          main: ['csvTable'],
+          inspector: ['fileDetails'],
+        },
+        widgets: [
+          {
+            id: 'csvTable',
+            type: 'table.csv',
+            title: 'CSV Data',
+            bindings: { file: '@csv' },
+          },
+          {
+            id: 'fileDetails',
+            type: 'panel.fileDetails',
+            title: 'File Details',
+            bindings: { file: '@file' },
+          },
+        ],
+      },
+    },
+  },
+  {
+    regex: /\b(json|data|api)\b.*\b(view|preview|show|display|explore)\b/i,
+    spec: {
+      name: 'JSON Viewer',
+      description: 'View and explore JSON data structures',
+      category: 'Viewer',
+      icon: 'code',
+      settings: {},
+      inputs: {
+        accept: ['application/json', '.json'],
+        maxSize: 5 * 1024 * 1024, // 5MB
+        multiple: false,
+      },
+      ui: {
+        mode: 'live',
+        layout: {
+          main: ['jsonTable'],
+          inspector: ['fileDetails'],
+        },
+        widgets: [
+          {
+            id: 'jsonTable',
+            type: 'table.json',
+            title: 'JSON Data',
+            bindings: { file: '@json' },
+          },
+          {
+            id: 'fileDetails',
+            type: 'panel.fileDetails',
+            title: 'File Details',
+            bindings: { file: '@file' },
+          },
+        ],
+      },
+    },
+  },
+];
 
 const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
   {
@@ -246,7 +450,17 @@ const fallbackSpec: Omit<ToolSpec, 'id'> = {
 };
 
 export function generateToolFromText(input: string): ToolSpec {
-  // Find matching template
+  // Check viewer templates first (for live preview tools)
+  for (const template of viewerTemplates) {
+    if (template.regex.test(input)) {
+      return {
+        id: generateToolId(input + template.spec.name),
+        ...template.spec,
+      };
+    }
+  }
+
+  // Find matching processing template
   for (const template of toolTemplates) {
     if (template.regex.test(input)) {
       return {

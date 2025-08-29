@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { ToolSpec } from "@/lib/fastlane";
 import Dropzone from "./Dropzone";
 import ProgressBar from "./ProgressBar";
 import OutputList from "./OutputList";
+import WidgetHost from "../../widgets/WidgetHost";
+import { WidgetContextProvider } from "../../widgets/WidgetContext";
 
 interface ToolRunnerProps {
   toolSpec: ToolSpec;
@@ -29,6 +31,31 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
   const [progress, setProgress] = useState(0);
   const [outputFiles, setOutputFiles] = useState<Array<{ name: string; size: number; url: string }>>([]);
   const [previewFiles, setPreviewFiles] = useState<Array<{ file: File; preview: string; dimensions?: { width: number; height: number } }>>([]);
+
+  // Check if this is a widget-based tool with live mode
+  const isLiveMode = toolSpec.ui?.mode === "live";
+  const hasWidgets = toolSpec.ui?.widgets && toolSpec.ui.widgets.length > 0;
+
+  // Create input mapping for widget context
+  const inputMapping = useMemo(() => {
+    const mapping: Record<string, File | undefined> = {};
+    
+    // Map files to input IDs - for simple tools, use primary input
+    if (files.length > 0) {
+      mapping['pdf'] = files.find(f => f.type === 'application/pdf');
+      mapping['image'] = files.find(f => f.type.startsWith('image/'));
+      mapping['video'] = files.find(f => f.type.startsWith('video/'));
+      mapping['audio'] = files.find(f => f.type.startsWith('audio/'));
+      mapping['text'] = files.find(f => f.type.startsWith('text/'));
+      mapping['csv'] = files.find(f => f.type === 'text/csv' || f.name.endsWith('.csv'));
+      mapping['json'] = files.find(f => f.type === 'application/json' || f.name.endsWith('.json'));
+      
+      // Generic file mapping
+      mapping['file'] = files[0];
+    }
+    
+    return mapping;
+  }, [files]);
 
   const handleSettingChange = (key: string, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -194,6 +221,67 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
     }
   };
 
+  // Widget-based layout for live mode
+  if (isLiveMode && hasWidgets) {
+    return (
+      <WidgetContextProvider inputs={inputMapping}>
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Input Files Card - Always show for live mode */}
+          <Card className="w-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Input Files</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Dropzone
+                accept={toolSpec.inputs.accept}
+                maxSize={toolSpec.inputs.maxSize}
+                multiple={toolSpec.inputs.multiple}
+                files={files}
+                onFilesChange={setFiles}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Main Widget Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main widgets */}
+            <div className="lg:col-span-2 space-y-6">
+              {toolSpec.ui?.layout?.main?.map((widgetId) => {
+                const widget = toolSpec.ui?.widgets?.find(w => w.id === widgetId);
+                if (!widget) return null;
+                return (
+                  <WidgetHost
+                    key={widgetId}
+                    widget={widget}
+                    context={{} as any} // Context will be provided by provider
+                  />
+                );
+              })}
+            </div>
+
+            {/* Inspector widgets */}
+            {toolSpec.ui?.layout?.inspector && toolSpec.ui.layout.inspector.length > 0 && (
+              <div className="space-y-6">
+                {toolSpec.ui?.layout.inspector.map((widgetId) => {
+                  const widget = toolSpec.ui?.widgets?.find(w => w.id === widgetId);
+                  if (!widget) return null;
+                  return (
+                    <WidgetHost
+                      key={widgetId}
+                      widget={widget}
+                      context={{} as any} // Context will be provided by provider
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </WidgetContextProvider>
+    );
+  }
+
+  // Classic run mode layout
   return (
     <div className="max-w-6xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -215,17 +303,19 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
             </CardContent>
           </Card>
 
-          {/* Settings Card */}
-          <Card className="w-full">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 space-y-4">
-              {Object.entries(toolSpec.settings).map(([key, setting]) => 
-                renderSetting(key, setting)
-              )}
-            </CardContent>
-          </Card>
+          {/* Settings Card - Only show if has settings */}
+          {Object.keys(toolSpec.settings).length > 0 && (
+            <Card className="w-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0 space-y-4">
+                {Object.entries(toolSpec.settings).map(([key, setting]) => 
+                  renderSetting(key, setting)
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Right Column: Preview, Ready to Process and Output Files */}
