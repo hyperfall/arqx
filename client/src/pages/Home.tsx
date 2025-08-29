@@ -34,7 +34,7 @@ export default function Home() {
   return (
     <div className="h-screen flex flex-col" data-testid="home-page">
       {/* Main Content - Centered */}
-      <div className="flex-grow min-h-0 flex flex-col justify-center px-4 py-4 max-h-[calc(100vh-240px)]">
+      <div className="flex-grow min-h-0 flex flex-col justify-center px-4 py-4 max-h-[calc(100vh-300px)]">
         {/* Hero Section */}
         <div className="text-center mb-6 animate-fade-in">
           <div className="max-w-4xl mx-auto">
