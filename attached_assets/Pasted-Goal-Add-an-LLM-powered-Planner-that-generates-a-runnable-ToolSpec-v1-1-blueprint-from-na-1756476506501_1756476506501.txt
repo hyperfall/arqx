@@ -1,0 +1,231 @@
+Goal: Add an **LLM-powered Planner** that generates a runnable **ToolSpec v1.1** “blueprint” from natural language, with strict validation and a **Widget Registry** so Tool pages can adapt (e.g., “PDF viewer with live preview”). Keep fast-lane templates for common asks; fall back to LLM only when needed. No secrets required: if no API key, use fast-lane + stubs.
+
+────────────────────────────────────────────────
+STACK (keep current)
+────────────────────────────────────────────────
+• React + TypeScript + React Router
+• Tailwind + shadcn/ui + lucide-react
+• Zustand (state) + Zod (validation)
+• Dexie (IndexedDB cache) + localStorage
+• Supabase client optional (guard with env)
+• Add deps: pdfjs-dist, react-virtuoso (or react-window), @noble/hashes (sha256)
+
+npm i pdfjs-dist react-virtuoso @noble/hashes
+
+────────────────────────────────────────────────
+1) SPEC: ToolSpec v1.1 (extend)
+────────────────────────────────────────────────
+Create /src/spec/schema.ts with Zod schemas:
+
+type ToolSpecV1_1 = {
+  version: "1";
+  name: string;
+  summary: string;
+  inputs: Array<{
+    id: string; label?: string;
+    type: "file"|"file[]"|"text"|"number"|"boolean"|"select";
+    accept?: string[]; maxMB?: number; min?: number; max?: number; step?: number;
+    options?: {label:string; value:string}[]; default?: any; placeholder?: string;
+  }>;
+  pipeline: Array<{ op: string; args?: Record<string, any> }>;
+  output: { type: "file"|"file[]"|"text"|"json"|"none"; naming?: string; zip?: boolean };
+  ui?: {
+    mode?: "live"|"run"; // live hides Run row
+    layout?: { main: string[]; inspector?: string[] };
+    widgets?: Array<{
+      id: string; type: string; title?: string;
+      bindings?: Record<string,string>; // e.g. {file:"@pdf"}
+      options?: Record<string,any>;
+    }>;
+  };
+  suggested_extras?: string[];
+  notes?: string[]; // non-executable, for explainability
+};
+
+Export zod validators + types.
+
+────────────────────────────────────────────────
+2) CAPABILITIES: Registry + Handshake
+────────────────────────────────────────────────
+Create /src/capabilities/registry.ts:
+
+type Capability = {
+  id: string;
+  accepts?: string[]; produces?: string[];
+  env: Array<"browser"|"server">;
+  argsSchema: z.ZodTypeAny;
+  requires?: {
+    wasm?: Array<{ name: string }>;
+    browserApis?: Array<"Canvas"|"WebCodecs"|"ImageDecoder">;
+    binary?: Array<{ name: "ffmpeg"|"qpdf"|"gs"|"soffice"|"tesseract" }>;
+  };
+  limits?: { maxMB?: number };
+};
+
+// Seed a minimal browser set:
+- image.decode, image.resize{maxWidth,maxHeight,fit}, image.to_jpeg{quality,stripExif}, image.to_png, image.to_webp{quality}
+- gif.decode, frames.sample{every}, image.encode_png
+- pdf.merge, pdf.split{pages} (stub ok), pdf.compress{targetMB} (stub ok)
+- csv.to_json, json.to_csv
+- text.format{case,trim,wrapAt}
+
+Add /src/capabilities/handshake.ts:
+- Detect available browser APIs + lazy dynamic-import flags (e.g., canLoadFFmpegWasm).
+- Build a **liveRegistry** = static registry ∩ what’s available.
+- Export `getLiveRegistry()` promise used by planner.
+
+────────────────────────────────────────────────
+3) WIDGETS: Registry + PDF Viewer
+────────────────────────────────────────────────
+Create /src/widgets/registry.ts:
+
+export type WidgetProps = {
+  id: string; title?: string; bindings?: Record<string,string>;
+  options?: Record<string,any>;
+  ctx: {
+    getInput(id:string): File|Blob|undefined;
+    onInputChange(id:string, cb:(f?:File)=>void): () => void;
+    getState<T=any>(key:string, fallback:T): T;
+    setState(key:string, val:any): void;
+    emit(event:string, payload?:any): void;
+    on(event:string, cb:(p:any)=>void): () => void;
+  };
+};
+
+export const WidgetRegistry: Record<string, React.FC<WidgetProps>> = {
+  "viewer.pdf": PdfViewerWidget,
+  "viewer.image": ImageViewerWidget,
+  "viewer.video": VideoPlayerWidget,
+  "viewer.audio": AudioPlayerWidget,
+  "panel.fileDetails": FileDetailsWidget,
+  "panel.outputFiles": OutputFilesWidget,
+  "table.csv": CsvTableWidget,
+  "markdown.preview": MarkdownPreviewWidget
+};
+
+Implement **PdfViewerWidget** in /src/widgets/pdf/:
+- Use pdfjs-dist; set GlobalWorkerOptions.workerSrc.
+- Props: { file?, options:{ showSidebar?, showThumbnails?, showSearch?, continuous? } }
+- UI: page nav, zoom in/out/reset, fit-to-width, optional thumbnails (react-virtuoso), basic text search.
+- Layout: `.viewerRoot { height: min(75vh, 900px); border-radius: inherit; overflow: hidden }` with inner scroll; thumbnails scroll independently.
+- A11y: aria-labels; announce page changes via aria-live.
+
+Add simple versions of image/video/audio viewers (HTML elements), file details panel, CSV table (small virtualized list), markdown preview.
+
+Create <WidgetHost widget={...}/> that:
+- Resolves `@inputId` in `bindings` to actual File/Blob.
+- Subscribes to input changes and rerenders.
+- Passes ctx state helpers.
+
+────────────────────────────────────────────────
+4) TOOLRUNNER: Adapt to live/run modes
+────────────────────────────────────────────────
+Update /src/tool/ToolRunner.tsx:
+- Always render **Input Files** card.
+- If `spec.ui?.mode === "run"` (default):
+  • Render Settings + Run row + Output list (existing behavior).
+- If `spec.ui?.mode === "live"`:
+  • Render widgets in `ui.layout.main` and `ui.layout.inspector` via <WidgetHost/>.
+  • Hide Run row unless explicitly included.
+- Provide WidgetContext with current inputs + session state.
+- Ensure the widget area stays within MainCard and never overflows (outer overflow-hidden; inner scroll).
+
+────────────────────────────────────────────────
+5) FAST-LANE: Templates first
+────────────────────────────────────────────────
+Update /src/lib/fastlane.ts:
+- Regex → ToolSpec v1.1 for common asks:
+  • “png to jpg (quality 80)?” → run mode spec.
+  • “mp4 to mp3 (bitrate 192)?” → run mode spec.
+  • “merge pdf(s)” → run mode spec.
+  • “extract gif frames (every N)? (max width W)?” → run mode spec.
+  • “csv to json|json to csv” → run mode spec.
+  • “pdf viewer|view pdf with thumbnails/search” → **live mode** spec:
+    {
+      version:"1", name:"PDF Viewer", summary:"View PDFs with zoom, thumbnails, search",
+      inputs:[{id:"pdf",label:"PDF",type:"file",accept:["application/pdf"],maxMB:100}],
+      pipeline:[], output:{type:"none"},
+      ui:{
+        mode:"live",
+        layout:{ main:["pdfMain"], inspector:["fileDetails"] },
+        widgets:[
+          { id:"pdfMain", type:"viewer.pdf", title:"Preview", bindings:{file:"@pdf"}, options:{ showSidebar:true, showThumbnails:true, showSearch:true, continuous:true } },
+          { id:"fileDetails", type:"panel.fileDetails", title:"Details", bindings:{file:"@pdf"} }
+        ]
+      }
+    }
+
+Return null if no match (handoff to LLM).
+
+────────────────────────────────────────────────
+6) LLM PLANNER: JSON-only, safe, cached
+────────────────────────────────────────────────
+Create /src/planner/index.ts with:
+
+export type PlanConstraints = {
+  maxMB: number; localOnly: boolean; uiModeHint?: "live"|"run";
+};
+
+export async function planToolSpec(
+  userText: string, filesMeta: Array<{name:string; mime:string; size:number}>,
+  constraints: PlanConstraints
+): Promise<ToolSpecV1_1> {
+  // 1) try fast-lane
+  const fast = tryFastLane(userText);
+  if (fast) return fast;
+
+  // 2) if no API key, fallback to friendly default (Text Formatter tool)
+  if (!hasPlannerApiKey()) return defaultFallback(userText);
+
+  // 3) Build prompt with:
+  //    - Canonical Intent JSON (parsed entities)
+  //    - liveRegistry slice (capabilities) + WidgetRegistry catalog (types)
+  //    - constraints (maxMB, localOnly, uiModeHint)
+  // Use JSON/grammar mode; expect pure JSON.
+  const specJson = await callLLMPlanner({...});
+  const validated = validateOrRepair(specJson); // Zod validate; if errors → repair prompt once
+  return validated;
+}
+
+Implement:
+- `validateOrRepair(spec)` uses Zod; on fail, calls `repairSpec(badSpec, errors, registrySlice)` OR falls back to `closestSafe(spec)`.
+- Cache by `hash(normalizeIntent(userText) + registryVersion + locale)` in Dexie (with TTL). Return cached spec if exists.
+- `deltaUpdate(spec, userChange: string)` that calls a smaller “delta” planner when available, else minimal local patch.
+
+Prompts (internal strings):
+- Planner: “Output ONLY ToolSpec v1.1 JSON using ONLY these capabilities & widgets…”
+- Repair: “Fix to satisfy schema/constraints; preserve IDs; JSON only.”
+- Delta: “Minimally update; preserve IDs; JSON only.”
+
+Feature flags in /src/config.ts: { plannerLLM: boolean } → false by default.
+
+────────────────────────────────────────────────
+7) UI WIRES: Compose/Generate/Refine
+────────────────────────────────────────────────
+- Home composer “Generate Tool”:
+  • call planToolSpec(); show skeleton; then render Tool page; dock composer.
+- BottomDock “Refine”:
+  • call deltaUpdate(currentSpec, text); validate; update spec; keep inputs intact.
+- Header actions:
+  • “Explain plan” button shows `spec.notes[]` if present.
+
+────────────────────────────────────────────────
+8) CACHING & HASHING
+────────────────────────────────────────────────
+- Use @noble/hashes sha256 for:
+  • `specHash = sha256(stableStringify(spec))` for dedupe/versioning.
+  • `planCacheKey = sha256(normalizedIntent + registry.version + uiModeHint + localOnly)`.
+- Store plan cache in Dexie table `plan_cache` with TTL (e.g., 14 days).
+
+────────────────────────────────────────────────
+9) ACCEPTANCE (must pass)
+────────────────────────────────────────────────
+✓ Typing “create a pdf viewer with live preview and thumbnails” yields a ToolSpec with `ui.mode="live"` and a `viewer.pdf` widget; dropping a PDF shows an interactive viewer (zoom, page nav, search, optional thumbnails). No Run row shown.
+✓ Typing “convert mp4 to mp3 at 192 kbps” yields a run-mode ToolSpec with proper inputs and settings; Run shows progress and outputs (simulated ok).
+✓ Planner works offline via fast-lane; if API key missing, a safe default tool is created with a banner (“Using template; LLM disabled”).
+✓ All generated specs validate against Zod; broken specs are repaired or downgraded to a closest-safe version with a non-blocking notice.
+✓ Plans are cached; repeating the same request reuses the cached ToolSpec.
+✓ Delta refinements (“also resize to 1080p & strip exif”) minimally update the ToolSpec without UI flicker; inputs persist.
+✓ No layout overflows; live widgets stay within the MainCard; thumbnails and preview scroll independently; BottomDock never covers content.
+
+Implement these modules and wire them into the existing UI. Keep all LLM calls optional behind a feature flag and JSON-only. The app must be runnable with fast-lane templates even without any API keys.
