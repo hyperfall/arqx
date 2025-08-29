@@ -1,4 +1,4 @@
-import { Search, Bell, Hammer } from "lucide-react";
+import { Search, Bell, Hammer, User, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,18 +9,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { ThemeSwitcher } from "@/themes/ThemeSwitcher";
 import { useAuthStore } from "@/store/useAuthStore";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { Link } from "wouter";
 import { useState } from "react";
 
 export default function TopBar() {
   const { isAuthenticated, user, signOut } = useAuthStore();
   const [searchValue, setSearchValue] = useState("");
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle search functionality
     console.log("Search:", searchValue);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
@@ -94,15 +106,42 @@ export default function TopBar() {
                     <div className="text-sm text-muted-foreground">{user?.email}</div>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem data-testid="profile-link">Profile</DropdownMenuItem>
-                  <DropdownMenuItem data-testid="settings-link">Settings</DropdownMenuItem>
+                  <DropdownMenuItem asChild data-testid="profile-link">
+                    <Link href="/profile" className="flex items-center w-full">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild data-testid="settings-link">
+                    <Link href="/settings" className="flex items-center w-full">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={signOut} data-testid="sign-out-button">
+                  <DropdownMenuItem onClick={handleSignOut} data-testid="sign-out-button">
+                    <LogOut className="mr-2 h-4 w-4" />
                     Sign out
                   </DropdownMenuItem>
                 </>
               ) : (
-                <DropdownMenuItem data-testid="sign-in-button">Sign in</DropdownMenuItem>
+                <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+                  <DialogTrigger asChild>
+                    <DropdownMenuItem 
+                      data-testid="sign-in-button"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setShowAuthDialog(true);
+                      }}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      Sign in
+                    </DropdownMenuItem>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <AuthDialog onClose={() => setShowAuthDialog(false)} />
+                  </DialogContent>
+                </Dialog>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

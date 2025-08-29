@@ -1,0 +1,141 @@
+Project: TOOLFORGE — UI stays as specced; **storage is dual-layer**:
+• Supabase Postgres = source of truth for owned/shared/searchable tools
+• IndexedDB = fast local drafts/cache/offline + big client-side blobs
+Build front-end (React + TS) so I can export to Windsurf later.
+
+────────────────────────────────────────────────
+STACK
+────────────────────────────────────────────────
+• React + TypeScript + React Router
+• Tailwind + shadcn/ui + lucide-react
+• Zustand (state) + Zod (validation)
+• IndexedDB via **Dexie** (or idb-keyval if easier)
+• Supabase JS client (optional; graceful fallback if envs missing)
+• Tiny sha256 util (e.g., @noble/hashes) for spec hashing
+• Playwright (1–2 smoke tests), ESLint + Prettier
+
+Keep all existing UI: pastel gradient, rounded left rail (Home, Tool Gallery, Settings, About), TopBar with search+avatar, big rounded MainCard, ChatGPT-style composer (center → docks inside card), Tool page (Input/Settings/Run/Output), Gallery page with sort/filter/search, 404 & error pages.
+
+────────────────────────────────────────────────
+DATA MODEL (ToolSpec) & HASH
+────────────────────────────────────────────────
+Define ToolSpec v1 and stable canonicalization:
+type ToolSpec = {
+  version:"1"; name:string; summary:string;
+  inputs:any[]; pipeline:Array<{op:string;args?:Record<string,any>}>;
+  output:{type:"file"|"file[]"|"text"|"json"; naming?:string; zip?:boolean};
+  suggested_extras?:string[];
+};
+- `canonicalize(spec)` = stable stringify (sorted keys)
+- `specHash = sha256(canonicalize(spec))`  // used for de-dupe
+
+────────────────────────────────────────────────
+WHERE DATA LIVES
+────────────────────────────────────────────────
+IndexedDB (local, fast, offline)
+- tables:
+  • local_toolspecs: { id:"local:<uuid>", spec, meta:{name, updatedAt, isPublic} }
+  • artifacts: blobs for outputs (LRU up to 200MB); TTL 60 days
+  • recent: last 10 viewed toolspec ids
+  • favorites: id set (local mirror)
+Supabase (if env set; source of truth)
+- tables:
+  • profiles(id uuid pk, email text, created_at)
+  • toolspecs(id uuid pk, owner uuid fk, name text, spec_hash text UNIQUE(owner,spec_hash),
+              current_version int, is_public boolean default true, is_seed boolean default false,
+              created_at, updated_at)
+  • toolspec_versions(id bigserial pk, toolspec_id uuid fk, version int, spec jsonb, notes text, created_at)
+  • favorites(user_id uuid, toolspec_id uuid, PRIMARY KEY(user_id,toolspec_id))
+- storage buckets (future): artifacts/ (signed URLs)
+- RLS: owner can read/write their tools; public readable; favorites per user
+
+────────────────────────────────────────────────
+REPOSITORY LAYER (portable)
+────────────────────────────────────────────────
+Create a `ToolRepo` interface and two impls (local + supabase), then a composer that prefers cloud but falls back to local.
+
+export type ToolMeta = {
+  id:string; owner?:string|null; name:string; specHash:string;
+  isPublic:boolean; updatedAt:string; source:"local"|"supabase";
+};
+
+export interface ToolRepo {
+  get(id:string):Promise<{spec:ToolSpec; meta:ToolMeta} | null>;
+  list(params?:{limit?:number; ownerOnly?:boolean; query?:string}):Promise<ToolMeta[]>;
+  save(spec:ToolSpec, meta?:Partial<ToolMeta>):Promise<ToolMeta>;  // version if exists
+  delete(id:string):Promise<void>;
+  favorite(id:string, on:boolean):Promise<void>;
+}
+
+- `repo = makeRepo({ supa?:SupabaseRepo|undefined, idb:LocalRepo })`
+- Keep all UI code talking only to `repo`
+
+────────────────────────────────────────────────
+SYNC STRATEGY (simple & safe)
+────────────────────────────────────────────────
+On boot:
+1) Detect Supabase env; if missing, run **local-only**.
+2) If signed in:
+   - fetch supa.list() and idb.list()
+   - merge by `specHash`: keep newer `updatedAt`
+   - show one-click CTA “Import your local drafts” → copies local → supa
+Save:
+- If signed in + supabase available:
+  - upsert into toolspecs on `(owner, spec_hash)`
+  - insert row in toolspec_versions with `version = current_version + 1`
+  - update current_version
+- Else:
+  - save to IndexedDB with `id = "local:<uuid>"`
+- Always cache latest locally for instant reopen
+Permalinks:
+- Cloud: `/t/:id` (loads via repo.get)
+- Local: `/t/local/:id` (loads from IDB)
+Artifacts:
+- For now still simulated; store small blobs in IDB with LRU (200MB).
+- (Future) server runs upload to Supabase Storage; cache a small preview locally.
+
+────────────────────────────────────────────────
+UI SURFACES TO ADD/KEEP
+────────────────────────────────────────────────
+• Tool page header: **Save**, **Save As**, **Export JSON**, **Import JSON**, **Copy link**.
+• Import supports drag-dropping a .json onto MainCard; validate with Zod; error inline.
+• BottomDock composer works as before; “Refine” triggers spec changes and **adds a history entry** (undo/redo).
+• Settings:
+  - Theme switcher (existing)
+  - **Local-only mode** toggle (never upload; hide server hints)
+  - **Import local drafts to account** (if signed in)
+  - **Clear local cache** (artifacts & drafts) with size meter
+• Gallery:
+  - Works offline from seeds/local; when online, merges cloud results; filters in URL params
+• 404 + error pages themed; Command Palette (⌘K) can open Recent tools and routes
+
+────────────────────────────────────────────────
+FEATURE FLAGS & CAPABILITY BANNER
+────────────────────────────────────────────────
+/src/config.ts
+- flags: { supabaseOn:boolean; serverFallback:boolean; plannerLLM:boolean }
+- default: supabaseOn = detect env; others false
+Capability banner on Tool page (read-only message):
+- “Runs locally • No server needed” or “Server recommended for large files”
+- Local-only mode hides server hints
+
+────────────────────────────────────────────────
+TESTS (Playwright)
+────────────────────────────────────────────────
+1) Local flow: Home → “png to jpg quality 80” → Generate → /t/local/:id → attach sample → Run → output appears → Save (local) → Copy link opens same tool.
+2) Import/Export: Export JSON then Import; tool loads; invalid JSON shows inline error.
+3) If Supabase env is set (optional): Save writes to cloud; permalink `/t/:id` loads after refresh; “Import local drafts” CTA copies one draft.
+
+────────────────────────────────────────────────
+ACCEPTANCE
+────────────────────────────────────────────────
+✓ Repo abstraction present (local + supabase) and all UI uses it.
+✓ Merge on boot by specHash with “Import local drafts” CTA.
+✓ /t/:id and /t/local/:id both work; Copy link copies correct URL.
+✓ Local artifacts LRU (cap ~200MB) with TTL ~60 days; size meter & clear button.
+✓ Save creates/bumps versions; Export/Import JSON work with validation.
+✓ Local-only mode prevents any Supabase writes; UI shows a shield icon.
+✓ No horizontal overflow; bottom dock never covers content (dynamic padding).
+✓ Code portable (no Next.js specifics); easy to move to Windsurf later.
+
+Build this now; keep all existing visual/interaction specs intact.

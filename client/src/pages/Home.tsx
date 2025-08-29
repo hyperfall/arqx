@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import Composer from "@/components/composer/Composer";
+import CapabilityBanner from "@/components/system/CapabilityBanner";
 import { useRecentStore } from "@/store/useRecentStore";
 import { ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
@@ -33,6 +34,11 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col" data-testid="home-page">
+      {/* System Status Banner */}
+      <div className="px-4 pt-4">
+        <CapabilityBanner compact />
+      </div>
+
       {/* Main Content - Centered */}
       <div className="flex-grow min-h-0 flex flex-col justify-center px-4 py-4 max-h-[calc(100vh-120px)]">
         {/* Hero Section */}

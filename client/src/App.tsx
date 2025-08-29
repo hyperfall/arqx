@@ -12,6 +12,7 @@ import Home from "@/pages/Home";
 import Gallery from "@/pages/Gallery";
 import Tool from "@/pages/Tool";
 import Settings from "@/pages/Settings";
+import Profile from "@/pages/Profile";
 import About from "@/pages/About";
 import NotFound from "@/pages/not-found";
 import { useKeyboard } from "@/lib/keyboard";
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/gallery" component={Gallery} />
       <Route path="/t/:id" component={Tool} />
       <Route path="/settings" component={Settings} />
+      <Route path="/profile" component={Profile} />
       <Route path="/about" component={About} />
       <Route component={NotFound} />
     </Switch>
