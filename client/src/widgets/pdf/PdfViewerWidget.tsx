@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { WidgetProps } from '../registry';
 import { usePdfDocument } from './usePdfDocument';
+import PdfPageRenderer from './PdfPageRenderer';
 import { 
   ZoomIn, 
   ZoomOut, 
@@ -40,9 +41,9 @@ export default function PdfViewerWidget({ id, title, bindings, options, ctx }: W
   const fileBinding = bindings?.file || '@pdf';
   const pdfFile = ctx.getInput(fileBinding.replace('@', '')) as File | undefined;
   
-  const { document: pdfDoc, pages, isLoading, error } = usePdfDocument(pdfFile);
+  const { document: pdfDoc, numPages, isLoading, error } = usePdfDocument(pdfFile);
 
-  const totalPages = pdfDoc?.numPages || 0;
+  const totalPages = numPages;
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -276,7 +277,7 @@ export default function PdfViewerWidget({ id, title, bindings, options, ctx }: W
             style={{ height: '100%' }}
           >
             <div className="p-4 flex justify-center">
-              {pdfDoc && (
+              {pdfDoc && totalPages > 0 && (
                 <div 
                   className="bg-white shadow-lg rounded"
                   style={{
@@ -284,31 +285,10 @@ export default function PdfViewerWidget({ id, title, bindings, options, ctx }: W
                     transformOrigin: 'center top',
                   }}
                 >
-                  <canvas
-                    ref={async (canvas) => {
-                      if (canvas && pdfDoc && currentPage <= totalPages) {
-                        try {
-                          const page = await pdfDoc.getPage(currentPage);
-                          const viewport = page.getViewport({ scale: 1.0 });
-                          const context = canvas.getContext('2d');
-                          
-                          if (context) {
-                            canvas.width = viewport.width;
-                            canvas.height = viewport.height;
-                            
-                            const renderContext = {
-                              canvasContext: context,
-                              viewport: viewport,
-                            };
-                            
-                            await page.render(renderContext).promise;
-                          }
-                        } catch (err) {
-                          console.warn(`Failed to render page ${currentPage}:`, err);
-                        }
-                      }
-                    }}
-                    className="block max-w-full h-auto"
+                  <PdfPageRenderer
+                    pdfDocument={pdfDoc}
+                    pageNumber={currentPage}
+                    scale={1.0}
                   />
                 </div>
               )}

@@ -6,21 +6,21 @@ pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
 export interface PdfDocumentHook {
   document: any | null;
-  pages: HTMLCanvasElement[];
+  numPages: number;
   isLoading: boolean;
   error: string | null;
 }
 
 export function usePdfDocument(file: File | undefined): PdfDocumentHook {
   const [document, setDocument] = useState<any | null>(null);
-  const [pages, setPages] = useState<HTMLCanvasElement[]>([]);
+  const [numPages, setNumPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!file) {
       setDocument(null);
-      setPages([]);
+      setNumPages(0);
       setError(null);
       return;
     }
@@ -30,7 +30,7 @@ export function usePdfDocument(file: File | undefined): PdfDocumentHook {
     async function loadPdf() {
       setIsLoading(true);
       setError(null);
-      setPages([]);
+      setNumPages(0);
 
       try {
         const arrayBuffer = await file!.arrayBuffer();
@@ -40,16 +40,7 @@ export function usePdfDocument(file: File | undefined): PdfDocumentHook {
         if (cancelled) return;
 
         setDocument(pdfDoc);
-
-        // Create placeholder pages array to show correct page count
-        const renderedPages: HTMLCanvasElement[] = [];
-        for (let i = 0; i < pdfDoc.numPages; i++) {
-          renderedPages[i] = document.createElement('canvas');
-        }
-
-        if (!cancelled) {
-          setPages(renderedPages);
-        }
+        setNumPages(pdfDoc.numPages);
       } catch (err) {
         if (!cancelled) {
           console.error('PDF loading error:', err);
@@ -71,7 +62,7 @@ export function usePdfDocument(file: File | undefined): PdfDocumentHook {
 
   return {
     document,
-    pages,
+    numPages,
     isLoading,
     error,
   };
