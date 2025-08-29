@@ -54,27 +54,27 @@ export default function Home() {
       </div>
 
       {/* Recent Tools Section - Always at bottom */}
-      <div className="border-t border-border pt-3 pb-3 px-4 bg-background/95 backdrop-blur-sm flex-shrink-0">
+      <div className="border-t border-border pt-2 pb-1 px-4 bg-background/95 backdrop-blur-sm flex-shrink-0">
         {recentTools.length > 0 ? (
           <>
-            <h2 className="text-sm font-semibold text-foreground mb-2">Recent Tools</h2>
-            <div className="flex gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent pb-2">
+            <h2 className="text-xs font-semibold text-foreground mb-1">Recent Tools</h2>
+            <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
               {recentTools.map((tool, index) => (
                 <Card
                   key={`${tool.name}-${tool.category}-${index}`}
-                  className="hover:bg-muted/50 transition-colors cursor-pointer group flex-shrink-0 w-32"
+                  className="hover:bg-muted/50 transition-colors cursor-pointer group flex-shrink-0 w-24"
                   onClick={() => navigate(`/t/${tool.id}`)}
                   data-testid={`recent-tool-${tool.id}`}
                 >
-                  <CardContent className="p-3">
+                  <CardContent className="p-2">
                     <div className="flex flex-col items-center text-center">
-                      <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center text-sm mb-2">
+                      <div className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center text-xs mb-1">
                         {getIconEmoji(tool.icon)}
                       </div>
-                      <h3 className="font-medium text-foreground group-hover:text-primary transition-colors text-xs truncate w-full">
+                      <h3 className="font-medium text-foreground group-hover:text-primary transition-colors text-xs truncate w-full leading-tight">
                         {tool.name}
                       </h3>
-                      <span className="px-2 py-1 text-xs bg-secondary rounded text-muted-foreground mt-1">
+                      <span className="px-1 py-0.5 text-xs bg-secondary rounded text-muted-foreground mt-0.5 leading-none">
                         {tool.category}
                       </span>
                     </div>
@@ -84,7 +84,7 @@ export default function Home() {
             </div>
           </>
         ) : (
-          <div className="text-center py-2">
+          <div className="text-center py-1">
             <p className="text-xs text-muted-foreground">No recent tools</p>
           </div>
         )}
