@@ -34,7 +34,7 @@ export default function Home() {
   return (
     <div className="h-screen flex flex-col" data-testid="home-page">
       {/* Main Content - Centered */}
-      <div className="flex-grow min-h-0 flex flex-col justify-center px-4 py-4 max-h-[calc(100vh-300px)]">
+      <div className="flex-grow min-h-0 flex flex-col justify-center px-4 py-4 max-h-[calc(100vh-120px)]">
         {/* Hero Section */}
         <div className="text-center mb-6 animate-fade-in">
           <div className="max-w-4xl mx-auto">
@@ -66,15 +66,15 @@ export default function Home() {
                   onClick={() => navigate(`/t/${tool.id}`)}
                   data-testid={`recent-tool-${tool.id}`}
                 >
-                  <CardContent className="p-2">
+                  <CardContent className="p-1">
                     <div className="flex flex-col items-center text-center">
-                      <div className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center text-xs mb-1">
+                      <div className="w-4 h-4 bg-primary/10 rounded flex items-center justify-center text-xs">
                         {getIconEmoji(tool.icon)}
                       </div>
-                      <h3 className="font-medium text-foreground group-hover:text-primary transition-colors text-xs truncate w-full leading-tight">
+                      <h3 className="font-medium text-foreground group-hover:text-primary transition-colors text-xs truncate w-full leading-none mt-0.5">
                         {tool.name}
                       </h3>
-                      <span className="px-1 py-0.5 text-xs bg-secondary rounded text-muted-foreground mt-0.5 leading-none">
+                      <span className="px-1 text-xs bg-secondary rounded text-muted-foreground mt-0.5 leading-none">
                         {tool.category}
                       </span>
                     </div>
