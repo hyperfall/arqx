@@ -260,8 +260,15 @@ export default function PdfViewerWidget({ id, title, bindings, options, ctx }: W
                     }`}
                     onClick={() => setCurrentPage(index + 1)}
                   >
-                    <div className="aspect-[3/4] bg-white rounded border flex items-center justify-center text-xs">
-                      Page {index + 1}
+                    <div className="aspect-[3/4] bg-white rounded border overflow-hidden">
+                      {pdfDoc && (
+                        <PdfPageRenderer
+                          pdfDocument={pdfDoc}
+                          pageNumber={index + 1}
+                          scale={0.2}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
                     </div>
                     <p className="text-xs text-center mt-1">{index + 1}</p>
                   </div>

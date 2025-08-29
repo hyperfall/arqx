@@ -29,12 +29,12 @@ export default function PdfPageRenderer({
       try {
         const page = await pdfDocument.getPage(pageNumber);
         const viewport = page.getViewport({ scale });
-        const context = canvas.getContext('2d');
+        const context = canvas!.getContext('2d');
         
         if (!context) return;
         
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+        canvas!.width = viewport.width;
+        canvas!.height = viewport.height;
         
         const renderContext = {
           canvasContext: context,
@@ -44,7 +44,7 @@ export default function PdfPageRenderer({
         renderTaskRef.current = page.render(renderContext);
         await renderTaskRef.current.promise;
         renderTaskRef.current = null;
-      } catch (err) {
+      } catch (err: any) {
         // Handle cancellation gracefully
         if (err?.name !== 'RenderingCancelledException') {
           console.warn(`Failed to render page ${pageNumber}:`, err);
