@@ -58,23 +58,23 @@ export default function Home() {
         {recentTools.length > 0 ? (
           <>
             <h2 className="text-sm font-semibold text-foreground mb-2">Recent Tools</h2>
-            <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {recentTools.slice(0, 8).map((tool, index) => (
+            <div className="flex gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent pb-2">
+              {recentTools.map((tool, index) => (
                 <Card
                   key={`${tool.name}-${tool.category}-${index}`}
-                  className="hover:bg-muted/50 transition-colors cursor-pointer group"
+                  className="hover:bg-muted/50 transition-colors cursor-pointer group flex-shrink-0 w-32"
                   onClick={() => navigate(`/t/${tool.id}`)}
                   data-testid={`recent-tool-${tool.id}`}
                 >
-                  <CardContent className="p-2">
+                  <CardContent className="p-3">
                     <div className="flex flex-col items-center text-center">
-                      <div className="w-6 h-6 bg-primary/10 rounded-md flex items-center justify-center text-xs mb-1">
+                      <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center text-sm mb-2">
                         {getIconEmoji(tool.icon)}
                       </div>
                       <h3 className="font-medium text-foreground group-hover:text-primary transition-colors text-xs truncate w-full">
                         {tool.name}
                       </h3>
-                      <span className="px-1 py-0.5 text-xs bg-secondary rounded text-muted-foreground mt-1">
+                      <span className="px-2 py-1 text-xs bg-secondary rounded text-muted-foreground mt-1">
                         {tool.category}
                       </span>
                     </div>
