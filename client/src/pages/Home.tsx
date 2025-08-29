@@ -55,9 +55,9 @@ export default function Home() {
         <div className="border-t border-border pt-6 mt-12">
           <h2 className="text-xl font-semibold text-foreground mb-4">Recent Tools</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {recentTools.slice(0, 8).map((tool) => (
+            {recentTools.slice(0, 8).map((tool, index) => (
               <Card
-                key={`${tool.id}-${tool.name}`}
+                key={`${tool.name}-${tool.category}-${index}`}
                 className="hover:bg-muted/50 transition-colors cursor-pointer group"
                 onClick={() => navigate(`/t/${tool.id}`)}
                 data-testid={`recent-tool-${tool.id}`}
