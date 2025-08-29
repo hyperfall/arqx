@@ -33,26 +33,29 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col" data-testid="home-page">
-      {/* Hero Section */}
-      <div className="text-center pt-16 pb-8 animate-fade-in">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
-            Build tools with natural language
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Describe what you want to build, and we'll generate a powerful tool for you instantly.
-          </p>
+      {/* Main Content - Centered */}
+      <div className="flex-1 flex flex-col justify-center">
+        {/* Hero Section */}
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
+              Build tools with natural language
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
+              Describe what you want to build, and we'll generate a powerful tool for you instantly.
+            </p>
+          </div>
+        </div>
+
+        {/* Main Composer */}
+        <div className="mb-8">
+          <Composer variant="center" />
         </div>
       </div>
 
-      {/* Main Composer */}
-      <div className="mb-20">
-        <Composer variant="center" />
-      </div>
-
-      {/* Recent Tools Section */}
+      {/* Recent Tools Section - Near bottom */}
       {recentTools.length > 0 && (
-        <div className="border-t border-border pt-8 pb-12 mt-8">
+        <div className="border-t border-border pt-6 pb-8">
           <h2 className="text-xl font-semibold text-foreground mb-4">Recent Tools</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {recentTools.slice(0, 8).map((tool, index) => (
