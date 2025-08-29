@@ -54,7 +54,7 @@ export default function Home() {
       </div>
 
       {/* Recent Tools Section - Always at bottom */}
-      <div className="border-t border-border pt-2 pb-1 px-4 bg-background/95 backdrop-blur-sm flex-shrink-0">
+      <div className="border-t border-border pt-2 pb-0 px-4 bg-background/95 backdrop-blur-sm flex-shrink-0">
         {recentTools.length > 0 ? (
           <>
             <h2 className="text-xs font-semibold text-foreground mb-1">Recent Tools</h2>
@@ -84,7 +84,7 @@ export default function Home() {
             </div>
           </>
         ) : (
-          <div className="text-center py-1">
+          <div className="text-center">
             <p className="text-xs text-muted-foreground">No recent tools</p>
           </div>
         )}
