@@ -55,7 +55,7 @@ export default function Home() {
 
       {/* Recent Tools Section - Near bottom */}
       {recentTools.length > 0 && (
-        <div className="border-t border-border pt-6 pb-8">
+        <div className="border-t border-border pt-6 pb-8 mt-4">
           <h2 className="text-xl font-semibold text-foreground mb-4">Recent Tools</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {recentTools.slice(0, 8).map((tool, index) => (
