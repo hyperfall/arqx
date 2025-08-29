@@ -30,7 +30,7 @@ export default function PdfViewerWidget({ id, title, bindings, options, ctx }: W
   const [zoom, setZoom] = useState(1.0);
   const [rotation, setRotation] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showSidebar, setShowSidebar] = useState(options?.showSidebar ?? true);
+  const [showSidebar, setShowSidebar] = useState(() => options?.showSidebar ?? true);
   const [viewMode, setViewMode] = useState<'single' | 'continuous'>('single');
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -79,12 +79,12 @@ export default function PdfViewerWidget({ id, title, bindings, options, ctx }: W
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [pdfDoc, totalPages]);
 
-  // Update widget state
-  useEffect(() => {
-    ctx.setState('currentPage', currentPage);
-    ctx.setState('zoom', zoom);
-    ctx.setState('rotation', rotation);
-  }, [currentPage, zoom, rotation, ctx]);
+  // Update widget state (removed to prevent infinite loop)
+  // useEffect(() => {
+  //   ctx.setState('currentPage', currentPage);
+  //   ctx.setState('zoom', zoom);
+  //   ctx.setState('rotation', rotation);
+  // }, [currentPage, zoom, rotation]);
 
   if (!pdfFile) {
     return (

@@ -78,7 +78,7 @@ export function usePdfDocument(file: File | undefined): PdfDocumentHook {
       } catch (err) {
         if (!cancelled) {
           console.error('PDF loading error:', err);
-          setError(err instanceof Error ? err.message : 'Failed to load PDF');
+          setError(err instanceof Error ? err.message : `Failed to load PDF: ${String(err)}`);
         }
       } finally {
         if (!cancelled) {
