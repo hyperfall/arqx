@@ -79,17 +79,21 @@ export default function Composer({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full p-6 bg-card border border-border rounded-2xl text-foreground placeholder-muted-foreground resize-none transition-all duration-200 min-h-[120px] text-base leading-relaxed shadow-sm hover:shadow-md focus:border-primary focus:shadow-lg focus:outline-none"
+              className="w-full p-6 bg-card rounded-2xl text-foreground placeholder-muted-foreground resize-none transition-all duration-300 min-h-[120px] text-base leading-relaxed shadow-sm hover:shadow-md focus:shadow-xl focus:shadow-primary/20 focus:outline-none focus:ring-0 border-0"
               rows={4}
               data-testid="main-composer"
             />
             
             <div className="absolute bottom-4 right-4 flex items-center space-x-3">
-              <div className="text-sm text-muted-foreground hidden sm:block">Press Enter to submit</div>
+              <div className={`text-sm transition-colors duration-300 hidden sm:block ${input.trim() ? 'text-foreground/80' : 'text-muted-foreground'}`}>Press Enter to submit</div>
               <Button 
                 type="submit" 
                 disabled={!input.trim()}
-                className="px-6 py-2 rounded-lg font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground transition-colors"
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  input.trim() 
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25' 
+                    : 'bg-muted text-muted-foreground cursor-not-allowed'
+                }`}
                 data-testid="generate-tool-button"
               >
                 <Send className="w-4 h-4 mr-2" />
