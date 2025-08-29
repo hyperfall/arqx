@@ -721,52 +721,32 @@ const fallbackSpecs: Array<Omit<ToolSpec, 'id'>> = [
 ];
 
 export function generateToolFromText(input: string): ToolSpec {
-  console.log('🔧 Tool Generation Debug:', { input });
-  
   // Check viewer templates first (for live preview tools)
   for (const template of viewerTemplates) {
     if (template.regex.test(input)) {
-      const toolSpec = {
+      return {
         id: generateToolId(input + template.spec.name),
         ...template.spec,
       };
-      console.log('✅ Matched viewer template:', { 
-        templateName: template.spec.name, 
-        regex: template.regex.toString(), 
-        generatedId: toolSpec.id 
-      });
-      return toolSpec;
     }
   }
 
   // Find matching processing template
   for (const template of toolTemplates) {
     if (template.regex.test(input)) {
-      const toolSpec = {
+      return {
         id: generateToolId(input + template.spec.name),
         ...template.spec,
       };
-      console.log('✅ Matched tool template:', { 
-        templateName: template.spec.name, 
-        regex: template.regex.toString(), 
-        generatedId: toolSpec.id 
-      });
-      return toolSpec;
     }
   }
 
   // Select a fallback based on input characteristics for better variety
   const fallbackSpec = selectFallbackSpec(input);
-  const toolSpec = {
+  return {
     id: generateToolId(input + fallbackSpec.name),
     ...fallbackSpec,
   };
-  console.log('⚠️ Using fallback:', { 
-    fallbackName: fallbackSpec.name, 
-    input, 
-    generatedId: toolSpec.id 
-  });
-  return toolSpec;
 }
 
 function selectFallbackSpec(input: string): Omit<ToolSpec, 'id'> {
@@ -793,9 +773,7 @@ function generateToolId(input?: string): string {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 4);
     
-    const toolId = `tool_${cleanInput.slice(0, 8)}_${hash}_${timestamp}_${random}`;
-    console.log('🆔 Generated ID:', { input, toolId, cleanInput: cleanInput.slice(0, 8), hash });
-    return toolId;
+    return `tool_${cleanInput.slice(0, 8)}_${hash}_${timestamp}_${random}`;
   }
   return `tool_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }

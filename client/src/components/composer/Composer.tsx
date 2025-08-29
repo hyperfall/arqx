@@ -35,6 +35,9 @@ export default function Composer({
 
     const toolSpec = generateToolFromText(input);
     
+    // Store the generated tool spec for retrieval on the Tool page
+    sessionStorage.setItem(`tool_${toolSpec.id}`, JSON.stringify(toolSpec));
+    
     if (onSubmit) {
       onSubmit(input, toolSpec);
     } else {
@@ -51,6 +54,9 @@ export default function Composer({
   const handleExampleClick = (exampleText: string) => {
     // Direct tool generation and navigation for quick examples
     const toolSpec = generateToolFromText(exampleText);
+    
+    // Store the generated tool spec for retrieval on the Tool page
+    sessionStorage.setItem(`tool_${toolSpec.id}`, JSON.stringify(toolSpec));
     
     if (onSubmit) {
       onSubmit(exampleText, toolSpec);

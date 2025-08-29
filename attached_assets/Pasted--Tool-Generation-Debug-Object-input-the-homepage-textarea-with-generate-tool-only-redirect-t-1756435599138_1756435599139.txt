@@ -1,0 +1,41 @@
+🔧 Tool Generation Debug: 
+Object { input: "the homepage textarea with generate tool only redirect to one page" }
+Console.js:61:15
+⚠️ Using fallback: 
+Object { fallbackName: "Text Formatter", input: "the homepage textarea with generate tool only redirect to one page", generatedId: "tool_thehomepaget_sm58u9" }
+Console.js:61:15
+🔧 Tool Generation Debug: 
+Object { input: "compress files" }
+Console.js:61:15
+✅ Matched tool template: 
+Object { templateName: "File Compressor", regex: "/\\b(compress|zip|archive|package)\\b/i", generatedId: "tool_compressfile_d2kgog" }
+Console.js:61:15
+[vite] hot updated: /src/index.css?v=lUMYO3XB7boFNJekuinzn Console.js:61:15
+[vite] hot updated: /src/pages/Tool.tsx Console.js:61:15
+[vite] hot updated: /src/components/composer/Composer.tsx Console.js:61:15
+🔧 Tool Generation Debug: 
+Object { input: "compress files" }
+Console.js:61:15
+🆔 Generated ID: 
+Object { input: "compress filesFile Compressor", toolId: "tool_compress_d2kgog_mew8d4pk_23n3", cleanInput: "compress", hash: "d2kgog" }
+Console.js:61:15
+✅ Matched tool template: 
+Object { templateName: "File Compressor", regex: "/\\b(compress|zip|archive|package)\\b/i", generatedId: "tool_compress_d2kgog_mew8d4pk_23n3" }
+Console.js:61:15
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820. (Reason: CORS request did not succeed). Status code: (null).
+
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820. (Reason: CORS request did not succeed). Status code: (null).
+
+🔧 Tool Generation Debug: 
+Object { input: "resize photo" }
+Console.js:61:15
+🆔 Generated ID: 
+Object { input: "resize photoImage Viewer", toolId: "tool_resizeph_b9h2mb_mew8dqdb_b67h", cleanInput: "resizeph", hash: "b9h2mb" }
+Console.js:61:15
+✅ Matched viewer template: 
+Object { templateName: "Image Viewer", regex: "/\\b(image|photo|picture|jpg|png|gif|jpeg|pic|img|view|preview|show|display)\\b/i", generatedId: "tool_resizeph_b9h2mb_mew8dqdb_b67h" }
+Console.js:61:15
+
+1
+
+​

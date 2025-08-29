@@ -555,27 +555,39 @@ export default function Tool() {
           spec.description = galleryTool.description;
           spec.category = galleryTool.category;
         } else {
-          // Generate fallback tool
-          spec = {
-            id: toolId,
-            name: 'Generated Tool',
-            description: 'This is a dynamically generated tool',
-            category: 'Text',
-            icon: 'type',
-            settings: {
-              operation: {
-                type: 'select',
-                label: 'Operation',
-                default: 'lowercase',
-                options: ['lowercase', 'uppercase', 'capitalize', 'trim'],
+          // Try to load dynamically generated tool from session storage
+          const storedTool = sessionStorage.getItem(`tool_${toolId}`);
+          if (storedTool) {
+            try {
+              spec = JSON.parse(storedTool);
+            } catch (error) {
+              console.warn('Failed to parse stored tool spec:', error);
+            }
+          }
+          
+          // Final fallback if no stored tool found
+          if (!spec) {
+            spec = {
+              id: toolId,
+              name: 'Generated Tool',
+              description: 'This is a dynamically generated tool',
+              category: 'Text',
+              icon: 'type',
+              settings: {
+                operation: {
+                  type: 'select',
+                  label: 'Operation',
+                  default: 'lowercase',
+                  options: ['lowercase', 'uppercase', 'capitalize', 'trim'],
+                },
               },
-            },
-            inputs: {
-              accept: ['text/plain'],
-              maxSize: 5 * 1024 * 1024,
-              multiple: true,
-            },
-          };
+              inputs: {
+                accept: ['text/plain'],
+                maxSize: 5 * 1024 * 1024,
+                multiple: true,
+              },
+            };
+          }
         }
       }
       
