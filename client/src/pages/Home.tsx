@@ -46,13 +46,13 @@ export default function Home() {
       </div>
 
       {/* Main Composer */}
-      <div className="mb-12">
+      <div className="mb-20">
         <Composer variant="center" />
       </div>
 
       {/* Recent Tools Section */}
       {recentTools.length > 0 && (
-        <div className="border-t border-border pt-8 pb-16">
+        <div className="border-t border-border pt-8 pb-12 mt-8">
           <h2 className="text-xl font-semibold text-foreground mb-4">Recent Tools</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {recentTools.slice(0, 8).map((tool, index) => (
