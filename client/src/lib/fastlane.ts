@@ -787,9 +787,15 @@ function selectFallbackSpec(input: string): Omit<ToolSpec, 'id'> {
 
 function generateToolId(input?: string): string {
   if (input) {
-    // Generate consistent ID based on input text for better deduplication
-    const hash = input.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-    return `tool_${hash.slice(0, 12)}_${Math.abs(hashCode(input)).toString(36)}`;
+    // Generate more unique ID to avoid collisions
+    const cleanInput = input.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    const hash = Math.abs(hashCode(input)).toString(36);
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 4);
+    
+    const toolId = `tool_${cleanInput.slice(0, 8)}_${hash}_${timestamp}_${random}`;
+    console.log('🆔 Generated ID:', { input, toolId, cleanInput: cleanInput.slice(0, 8), hash });
+    return toolId;
   }
   return `tool_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
