@@ -34,12 +34,12 @@ export default function Home() {
   return (
     <div data-testid="home-page">
       {/* Hero Section */}
-      <div className="text-center mb-16 animate-fade-in">
+      <div className="text-center mb-12 animate-fade-in">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
             Build tools with natural language
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
             Describe what you want to build, and we'll generate a powerful tool for you instantly.
           </p>
         </div>
