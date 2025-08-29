@@ -13,7 +13,7 @@ export default function GalleryCard({ tool }: GalleryCardProps) {
   const [, navigate] = useLocation();
   const { addRecentTool } = useRecentStore();
 
-  const handleUse = (e: React.MouseEvent) => {
+  const handleUse = async (e: React.MouseEvent) => {
     e.stopPropagation();
     addRecentTool({
       id: tool.id,
@@ -22,6 +22,15 @@ export default function GalleryCard({ tool }: GalleryCardProps) {
       category: tool.category,
       icon: tool.icon,
     });
+    
+    // Track tool open
+    try {
+      const { TelemetryTracker } = await import('@/lib/analytics');
+      await TelemetryTracker.trackToolAction('open_tool', tool.id, tool.name);
+    } catch (error) {
+      console.warn('Failed to track tool open:', error);
+    }
+    
     navigate(`/t/${tool.id}`);
   };
 
@@ -48,7 +57,16 @@ export default function GalleryCard({ tool }: GalleryCardProps) {
   return (
     <div 
       className="bg-muted/20 rounded-xl p-6 hover:bg-muted/30 transition-colors cursor-pointer group"
-      onClick={() => navigate(`/t/${tool.id}`)}
+      onClick={async () => {
+        // Track gallery view
+        try {
+          const { TelemetryTracker } = await import('@/lib/analytics');
+          await TelemetryTracker.trackGalleryView();
+        } catch (error) {
+          console.warn('Failed to track gallery view:', error);
+        }
+        navigate(`/t/${tool.id}`);
+      }}
       data-testid={`gallery-card-${tool.id}`}
     >
       <div className="flex items-start justify-between mb-4">

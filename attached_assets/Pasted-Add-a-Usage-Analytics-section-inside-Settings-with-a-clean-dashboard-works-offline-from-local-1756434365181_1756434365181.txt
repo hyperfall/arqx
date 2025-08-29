@@ -1,0 +1,111 @@
+Add a **Usage & Analytics** section inside Settings with a clean dashboard: works offline from local telemetry; if Supabase env is available, augment with server totals. Keep UI responsive and overflow-safe inside our MainCard.
+
+────────────────────────────────────────────────
+SCOPE & NAV
+────────────────────────────────────────────────
+• Settings page becomes tabbed: [General] [Themes] [Keyboard] [Analytics] [Privacy].
+• Route stays /settings; tabs are client-side.
+• No backend required; Supabase is optional enhancer.
+
+────────────────────────────────────────────────
+DATA SOURCES
+────────────────────────────────────────────────
+• Client telemetry store (already stubbed): persist events in IndexedDB (Dexie) table `telemetry_events`.
+• Event shape (append-only):
+  {
+    id: string; ts: number; user?: string|null;
+    type: "run_start"|"run_success"|"run_error"|"save_tool"|"open_tool"|"export_spec"|"import_spec"|"prefetch"|"gallery_view";
+    toolId?: string; toolName?: string;
+    bytesIn?: number; bytesOut?: number;
+    venue?: "browser"|"server";
+    durationMs?: number; errorCode?: string;
+  }
+• If Supabase available, add an aggregate fetch from a view `v_usage_30d` (optional). If missing, skip silently.
+
+────────────────────────────────────────────────
+UI COMPOSITION (Settings → Analytics tab)
+────────────────────────────────────────────────
+Within MainCard, add:
+
+A) Overview strip (4 HUD cards, no overflow)
+   - Runs (7d / 30d) with ▲/▼ delta vs previous period
+   - Success rate (past 7d)
+   - Avg duration p50 / p95
+   - Local vs Server % (donut mini)
+   Each card uses `.metric` numbers (tabular-nums) and captions.
+
+B) Usage charts (lazy loaded via Recharts or lightweight alternative)
+   - Line chart: Runs per day (last 30 days)
+   - Stacked bar: Bytes processed per day (in/out)
+   - Donut: Local vs Server execution split
+   Keep a max height (e.g., 260–300px), `overflow-hidden`, responsive width.
+
+C) Quotas & storage
+   - Local cache meter: Artifacts size in IndexedDB (LRU cap 200MB) with “Clear cache” button & confirm dialog.
+   - Cloud (if Supabase): storage used vs plan (call Storage list/metadata if available) and count of toolspecs.
+   - Toggle “Local-only mode” (already in General) with a small tip explaining analytics limits in this mode.
+
+D) Top tools table (virtualized)
+   - Columns: Tool, Runs (7d), Success %, Avg duration, Bytes in/out
+   - Click row → open tool
+   - Use virtualization (react-window/react-virtuoso) to avoid overflow and keep 60fps.
+
+E) Failures & latency
+   - Small histogram: run duration buckets
+   - List top error codes (mapped to friendly messages) with counts and recent samples (click to see last 5 errors; modal)
+
+F) Audit trail (compact)
+   - Last 10 actions (save_tool, import_spec, export_spec) with timestamps; copy specHash button.
+
+G) Export
+   - “Export usage (CSV/JSON)” for the visible time range (client-only aggregation).
+   - Button shows a non-blocking toast + downloads file.
+
+────────────────────────────────────────────────
+AGGREGATION UTILS (client-only)
+────────────────────────────────────────────────
+• Add `lib/analytics.ts` with:
+  - `getRange(events, {from,to})`
+  - `bucketByDay(events)` → { day -> counts, bytes }
+  - `durationStats(events)` → p50/p95
+  - `successRate(events)` → percentage
+  - `topTools(events, {limit:20})`
+  - `sizeOfArtifacts()` (walk IDB artifacts store; return MB)
+• Respect “Local-only mode”: never attempt Supabase fetches; hide cloud meters.
+
+────────────────────────────────────────────────
+COMPONENTS TO CREATE
+────────────────────────────────────────────────
+• settings/AnalyticsTab.tsx (main orchestrator)
+• analytics/OverviewCards.tsx
+• analytics/Charts.tsx (lazy; Line, StackedBar, Donut components)
+• analytics/QuotaMeters.tsx (local cache meter + clear action; cloud meter if available)
+• analytics/TopToolsTable.tsx (virtualized)
+• analytics/FailuresPanel.tsx
+• analytics/AuditTrail.tsx
+• analytics/ExportButtons.tsx
+All inside `components/analytics/` and loaded only when the tab is active.
+
+────────────────────────────────────────────────
+PERFORMANCE & ACCESSIBILITY
+────────────────────────────────────────────────
+• Lazy import chart libs (split bundle); skeletons while loading.
+• Charts get fixed max-heights; containers `overflow-hidden`; tables wrap in `ScrollArea` with stable scrollbars.
+• Tabular numbers for all metrics; aria-labels on charts and meters; announce downloads via aria-live.
+• Debounce aggregation (100–200ms) when date range changes.
+
+────────────────────────────────────────────────
+SEED & DEMO
+────────────────────────────────────────────────
+• On first run (dev mode), seed 30 days of synthetic telemetry unless existing data is present (guard with a flag).
+• Provide a date range selector (Last 7d, 30d, 90d).
+
+────────────────────────────────────────────────
+ACCEPTANCE
+────────────────────────────────────────────────
+✓ Settings → Analytics renders offline from local telemetry with skeletons then real data.
+✓ Overview metrics, 3 charts, quotas, top tools table, failures, audit trail are visible with no overflow at laptop/desktop widths.
+✓ Clear cache updates the meter immediately and prunes artifacts (LRU).
+✓ Export CSV/JSON downloads filtered data; toast confirms.
+✓ If Supabase is configured and signed in, cloud meters & totals appear; otherwise they’re hidden without errors.
+✓ Keyboard friendly: tabs navigable, tables focusable, buttons have visible focus rings.

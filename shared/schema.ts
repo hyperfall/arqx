@@ -30,6 +30,20 @@ export const favorites = pgTable("favorites", {
   toolspecId: uuid("toolspec_id").references(() => toolspecs.id).notNull(),
 });
 
+export const telemetryEvents = pgTable("telemetry_events", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  ts: timestamp("ts").notNull(),
+  userId: uuid("user_id").references(() => profiles.id),
+  type: text("type").notNull(),
+  toolId: text("tool_id"),
+  toolName: text("tool_name"),
+  bytesIn: text("bytes_in"), // Store as text to handle large numbers
+  bytesOut: text("bytes_out"),
+  venue: text("venue"),
+  durationMs: text("duration_ms"),
+  errorCode: text("error_code"),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -48,6 +62,10 @@ export const insertToolspecSchema = createInsertSchema(toolspecs).omit({
 
 export const insertFavoriteSchema = createInsertSchema(favorites);
 
+export const insertTelemetryEventSchema = createInsertSchema(telemetryEvents).omit({
+  id: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertProfile = z.infer<typeof insertProfileSchema>;
@@ -56,3 +74,5 @@ export type InsertToolspec = z.infer<typeof insertToolspecSchema>;
 export type Toolspec = typeof toolspecs.$inferSelect;
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
+export type InsertTelemetryEvent = z.infer<typeof insertTelemetryEventSchema>;
+export type TelemetryEvent = typeof telemetryEvents.$inferSelect;

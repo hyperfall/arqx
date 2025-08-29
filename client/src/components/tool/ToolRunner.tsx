@@ -118,22 +118,62 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
     setProgress(0);
     setOutputFiles([]);
 
-    // Simulate processing
-    for (let i = 0; i <= 100; i += Math.random() * 15) {
-      setProgress(Math.min(i, 100));
-      await new Promise(resolve => setTimeout(resolve, 100));
+    // Import telemetry tracker
+    const { TelemetryTracker } = await import('@/lib/analytics');
+    
+    // Calculate input bytes
+    const bytesIn = files.reduce((total, file) => total + file.size, 0);
+    const startTime = performance.now();
+    
+    // Track run start
+    await TelemetryTracker.trackRunStart(
+      toolSpec.id || 'demo_tool', 
+      toolSpec.name, 
+      bytesIn
+    );
+
+    try {
+      // Simulate processing
+      for (let i = 0; i <= 100; i += Math.random() * 15) {
+        setProgress(Math.min(i, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      // Simulate output files
+      const outputs = files.map(file => ({
+        name: file.name.replace(/\.[^/.]+$/, '') + '_converted.' + getOutputExtension(toolSpec.category),
+        size: Math.floor(file.size * 0.8), // Simulate compression
+        url: URL.createObjectURL(file), // Mock URL
+      }));
+
+      const bytesOut = outputs.reduce((total, output) => total + output.size, 0);
+      const durationMs = performance.now() - startTime;
+      
+      setOutputFiles(outputs);
+      setIsRunning(false);
+      setProgress(100);
+
+      // Track successful run
+      await TelemetryTracker.trackRunSuccess(
+        toolSpec.id || 'demo_tool',
+        toolSpec.name,
+        durationMs,
+        bytesOut
+      );
+    } catch (error) {
+      const durationMs = performance.now() - startTime;
+      setIsRunning(false);
+      
+      // Track failed run
+      await TelemetryTracker.trackRunError(
+        toolSpec.id || 'demo_tool',
+        toolSpec.name,
+        'PROCESSING_FAILED',
+        durationMs
+      );
+      
+      throw error;
     }
-
-    // Simulate output files
-    const outputs = files.map(file => ({
-      name: file.name.replace(/\.[^/.]+$/, '') + '_converted.' + getOutputExtension(toolSpec.category),
-      size: Math.floor(file.size * 0.8), // Simulate compression
-      url: URL.createObjectURL(file), // Mock URL
-    }));
-
-    setOutputFiles(outputs);
-    setIsRunning(false);
-    setProgress(100);
   };
 
   const getOutputExtension = (category: string): string => {
