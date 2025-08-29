@@ -43,7 +43,7 @@ export interface ToolSpec {
 // Viewer tool templates for live preview mode
 const viewerTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
   {
-    regex: /\b(pdf|document|read|view|preview)\b.*\b(pdf|document)\b/i,
+    regex: /\b(pdf|document|doc|read|view|preview|open)\b/i,
     spec: {
       name: 'PDF Viewer',
       description: 'View and navigate PDF documents with zoom, thumbnails, and search',
@@ -80,7 +80,7 @@ const viewerTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
     },
   },
   {
-    regex: /\b(image|photo|picture|jpg|png|gif|jpeg)\b.*\b(view|preview|show|display)\b/i,
+    regex: /\b(image|photo|picture|jpg|png|gif|jpeg|pic|img|view|preview|show|display)\b/i,
     spec: {
       name: 'Image Viewer',
       description: 'View and zoom images with detailed information',
@@ -116,7 +116,7 @@ const viewerTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
     },
   },
   {
-    regex: /\b(video|movie|mp4|avi|mov)\b.*\b(view|play|preview|watch)\b/i,
+    regex: /\b(video|movie|mp4|avi|mov|film|play|watch)\b/i,
     spec: {
       name: 'Video Player',
       description: 'Play and preview video files',
@@ -152,7 +152,7 @@ const viewerTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
     },
   },
   {
-    regex: /\b(csv|table|spreadsheet|data)\b.*\b(view|preview|show|display)\b/i,
+    regex: /\b(csv|table|spreadsheet|data|sheet|excel)\b/i,
     spec: {
       name: 'CSV Table Viewer',
       description: 'View and explore CSV data in table format',
@@ -188,7 +188,7 @@ const viewerTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
     },
   },
   {
-    regex: /\b(json|data|api)\b.*\b(view|preview|show|display|explore)\b/i,
+    regex: /\b(json|api|data structure|object)\b/i,
     spec: {
       name: 'JSON Viewer',
       description: 'View and explore JSON data structures',
@@ -226,6 +226,41 @@ const viewerTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
 ];
 
 const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
+  // Image conversion patterns
+  {
+    regex: /\b(convert|change|transform).*\b(png|jpg|jpeg|gif|webp|bmp|tiff|image)\b/i,
+    spec: {
+      name: 'Image Converter',
+      description: 'Convert images between different formats with quality settings',
+      category: 'Images',
+      icon: 'image',
+      settings: {
+        format: {
+          type: 'select',
+          label: 'Output Format',
+          default: 'jpeg',
+          options: ['jpeg', 'png', 'webp', 'gif'],
+        },
+        quality: {
+          type: 'slider',
+          label: 'Quality',
+          default: 85,
+          min: 1,
+          max: 100,
+        },
+        stripExif: {
+          type: 'checkbox',
+          label: 'Strip EXIF Data',
+          default: true,
+        },
+      },
+      inputs: {
+        accept: ['image/*'],
+        maxSize: 20 * 1024 * 1024, // 20MB
+        multiple: true,
+      },
+    },
+  },
   {
     regex: /convert\s+png\s+to\s+jpe?g/i,
     spec: {
@@ -269,6 +304,35 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
       },
     },
   },
+  // Video/Audio conversion patterns
+  {
+    regex: /\b(convert|extract|change).*\b(video|audio|mp4|mp3|wav|avi|mov)\b/i,
+    spec: {
+      name: 'Media Converter',
+      description: 'Convert video and audio files between formats',
+      category: 'Media',
+      icon: 'film',
+      settings: {
+        format: {
+          type: 'select',
+          label: 'Output Format',
+          default: 'mp3',
+          options: ['mp3', 'wav', 'mp4', 'avi'],
+        },
+        quality: {
+          type: 'select',
+          label: 'Quality',
+          default: 'high',
+          options: ['low', 'medium', 'high'],
+        },
+      },
+      inputs: {
+        accept: ['video/*', 'audio/*'],
+        maxSize: 100 * 1024 * 1024, // 100MB
+        multiple: true,
+      },
+    },
+  },
   {
     regex: /convert\s+mp4\s+to\s+mp3/i,
     spec: {
@@ -292,6 +356,33 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
       inputs: {
         accept: ['video/mp4'],
         maxSize: 100 * 1024 * 1024, // 100MB
+        multiple: true,
+      },
+    },
+  },
+  // PDF manipulation patterns  
+  {
+    regex: /\b(merge|combine|join|concat).*\b(pdf|document)\b/i,
+    spec: {
+      name: 'PDF Merger',
+      description: 'Combine multiple PDF files into a single document',
+      category: 'Documents',
+      icon: 'file-text',
+      settings: {
+        bookmarks: {
+          type: 'checkbox',
+          label: 'Preserve Bookmarks',
+          default: true,
+        },
+        metadata: {
+          type: 'checkbox',
+          label: 'Preserve Metadata',
+          default: true,
+        },
+      },
+      inputs: {
+        accept: ['application/pdf', '.pdf'],
+        maxSize: 50 * 1024 * 1024, // 50MB
         multiple: true,
       },
     },
@@ -388,6 +479,134 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
       },
     },
   },
+  // Text processing patterns
+  {
+    regex: /\b(format|process|clean|transform).*\b(text|string|content)\b/i,
+    spec: {
+      name: 'Text Processor',
+      description: 'Process and format text with various transformations',
+      category: 'Text',
+      icon: 'type',
+      settings: {
+        operation: {
+          type: 'select',
+          label: 'Operation',
+          default: 'format',
+          options: ['uppercase', 'lowercase', 'capitalize', 'trim', 'remove-duplicates', 'word-count'],
+        },
+        encoding: {
+          type: 'select',
+          label: 'Encoding',
+          default: 'utf-8',
+          options: ['utf-8', 'ascii', 'latin1'],
+        },
+      },
+      inputs: {
+        accept: ['text/plain', '.txt'],
+        maxSize: 10 * 1024 * 1024, // 10MB
+        multiple: true,
+      },
+    },
+  },
+  // File compression patterns
+  {
+    regex: /\b(compress|zip|archive|package)\b/i,
+    spec: {
+      name: 'File Compressor',
+      description: 'Compress files and folders into archives',
+      category: 'Files',
+      icon: 'database',
+      settings: {
+        format: {
+          type: 'select',
+          label: 'Archive Format',
+          default: 'zip',
+          options: ['zip', 'tar', 'gzip'],
+        },
+        level: {
+          type: 'slider',
+          label: 'Compression Level',
+          default: 6,
+          min: 1,
+          max: 9,
+        },
+      },
+      inputs: {
+        accept: ['*/*'],
+        maxSize: 100 * 1024 * 1024, // 100MB
+        multiple: true,
+      },
+    },
+  },
+  // Data manipulation patterns
+  {
+    regex: /\b(parse|analyze|extract|convert).*\b(csv|json|xml|data)\b/i,
+    spec: {
+      name: 'Data Converter',
+      description: 'Convert and transform data between different formats',
+      category: 'Data',
+      icon: 'database',
+      settings: {
+        outputFormat: {
+          type: 'select',
+          label: 'Output Format',
+          default: 'json',
+          options: ['json', 'csv', 'xml', 'yaml'],
+        },
+        encoding: {
+          type: 'select',
+          label: 'Text Encoding',
+          default: 'utf-8',
+          options: ['utf-8', 'ascii', 'latin1'],
+        },
+      },
+      inputs: {
+        accept: ['text/csv', 'application/json', 'text/xml', '.csv', '.json', '.xml'],
+        maxSize: 25 * 1024 * 1024, // 25MB
+        multiple: true,
+      },
+    },
+  },
+  // Image processing patterns
+  {
+    regex: /\b(resize|crop|optimize|enhance).*\b(image|photo|picture)\b/i,
+    spec: {
+      name: 'Image Editor',
+      description: 'Edit and enhance images with various tools',
+      category: 'Images',
+      icon: 'image',
+      settings: {
+        operation: {
+          type: 'select',
+          label: 'Operation',
+          default: 'resize',
+          options: ['resize', 'crop', 'optimize', 'enhance', 'filter'],
+        },
+        quality: {
+          type: 'slider',
+          label: 'Quality',
+          default: 85,
+          min: 1,
+          max: 100,
+        },
+        width: {
+          type: 'input',
+          label: 'Width (px)',
+          default: 800,
+        },
+        height: {
+          type: 'input',
+          label: 'Height (px)',
+          default: 600,
+        },
+      },
+      inputs: {
+        accept: ['image/*'],
+        maxSize: 20 * 1024 * 1024, // 20MB
+        multiple: true,
+      },
+    },
+  },
   {
     regex: /strip\s+(exif|metadata)/i,
     spec: {
@@ -423,31 +642,83 @@ const toolTemplates: { regex: RegExp; spec: Omit<ToolSpec, 'id'> }[] = [
   },
 ];
 
-const fallbackSpec: Omit<ToolSpec, 'id'> = {
-  name: 'Text Formatter',
-  description: 'Format and process text files with various options',
-  category: 'Text',
-  icon: 'type',
-  settings: {
-    operation: {
-      type: 'select',
-      label: 'Operation',
-      default: 'lowercase',
-      options: ['lowercase', 'uppercase', 'capitalize', 'trim', 'remove-duplicates'],
+// Create multiple fallback options to provide variety
+const fallbackSpecs: Array<Omit<ToolSpec, 'id'>> = [
+  {
+    name: 'Text Formatter',
+    description: 'Format and process text files with various options',
+    category: 'Text',
+    icon: 'type',
+    settings: {
+      operation: {
+        type: 'select',
+        label: 'Operation',
+        default: 'lowercase',
+        options: ['lowercase', 'uppercase', 'capitalize', 'trim', 'remove-duplicates'],
+      },
+      encoding: {
+        type: 'select',
+        label: 'Text Encoding',
+        default: 'utf-8',
+        options: ['utf-8', 'ascii', 'latin1'],
+      },
     },
-    encoding: {
-      type: 'select',
-      label: 'Text Encoding',
-      default: 'utf-8',
-      options: ['utf-8', 'ascii', 'latin1'],
+    inputs: {
+      accept: ['text/plain', '.txt'],
+      maxSize: 5 * 1024 * 1024, // 5MB
+      multiple: true,
     },
   },
-  inputs: {
-    accept: ['text/plain', '.txt'],
-    maxSize: 5 * 1024 * 1024, // 5MB
-    multiple: true,
+  {
+    name: 'File Processor',
+    description: 'Process and analyze various file types',
+    category: 'Files',
+    icon: 'database',
+    settings: {
+      analysis: {
+        type: 'select',
+        label: 'Analysis Type',
+        default: 'metadata',
+        options: ['metadata', 'content', 'structure', 'summary'],
+      },
+      format: {
+        type: 'select',
+        label: 'Output Format',
+        default: 'json',
+        options: ['json', 'text', 'csv'],
+      },
+    },
+    inputs: {
+      accept: ['*/*'],
+      maxSize: 10 * 1024 * 1024, // 10MB
+      multiple: true,
+    },
   },
-};
+  {
+    name: 'Data Analyzer',
+    description: 'Analyze and extract insights from data files',
+    category: 'Data',
+    icon: 'maximize',
+    settings: {
+      operation: {
+        type: 'select',
+        label: 'Operation',
+        default: 'summary',
+        options: ['summary', 'statistics', 'validation', 'transformation'],
+      },
+      detailed: {
+        type: 'checkbox',
+        label: 'Detailed Analysis',
+        default: true,
+      },
+    },
+    inputs: {
+      accept: ['text/csv', 'application/json', '.csv', '.json', '.txt'],
+      maxSize: 15 * 1024 * 1024, // 15MB
+      multiple: true,
+    },
+  },
+];
 
 export function generateToolFromText(input: string): ToolSpec {
   // Check viewer templates first (for live preview tools)
@@ -470,11 +741,28 @@ export function generateToolFromText(input: string): ToolSpec {
     }
   }
 
-  // Return fallback if no match
+  // Select a fallback based on input characteristics for better variety
+  const fallbackSpec = selectFallbackSpec(input);
   return {
     id: generateToolId(input + fallbackSpec.name),
     ...fallbackSpec,
   };
+}
+
+function selectFallbackSpec(input: string): Omit<ToolSpec, 'id'> {
+  const lowerInput = input.toLowerCase();
+  
+  // Simple heuristics to choose appropriate fallback
+  if (lowerInput.includes('data') || lowerInput.includes('analyze') || lowerInput.includes('csv') || lowerInput.includes('json')) {
+    return fallbackSpecs[2]; // Data Analyzer
+  }
+  
+  if (lowerInput.includes('file') || lowerInput.includes('process') || lowerInput.includes('analyze')) {
+    return fallbackSpecs[1]; // File Processor
+  }
+  
+  // Default to text formatter
+  return fallbackSpecs[0]; // Text Formatter
 }
 
 function generateToolId(input?: string): string {
