@@ -32,9 +32,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" data-testid="home-page">
+    <div className="h-screen flex flex-col overflow-hidden" data-testid="home-page">
       {/* Main Content - Centered */}
-      <div className="flex-1 flex flex-col justify-center">
+      <div className="flex-1 flex flex-col justify-center px-4">
         {/* Hero Section */}
         <div className="text-center mb-8 animate-fade-in">
           <div className="max-w-4xl mx-auto">
@@ -48,16 +48,16 @@ export default function Home() {
         </div>
 
         {/* Main Composer */}
-        <div className="mb-8">
+        <div>
           <Composer variant="center" />
         </div>
       </div>
 
-      {/* Recent Tools Section - Near bottom */}
+      {/* Recent Tools Section - Fixed at bottom of viewport */}
       {recentTools.length > 0 && (
-        <div className="border-t border-border pt-6 pb-8 mt-12">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Recent Tools</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="border-t border-border pt-4 pb-4 px-4 bg-background/95 backdrop-blur-sm">
+          <h2 className="text-lg font-semibold text-foreground mb-3">Recent Tools</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
             {recentTools.slice(0, 8).map((tool, index) => (
               <Card
                 key={`${tool.name}-${tool.category}-${index}`}
@@ -65,25 +65,17 @@ export default function Home() {
                 onClick={() => navigate(`/t/${tool.id}`)}
                 data-testid={`recent-tool-${tool.id}`}
               >
-                <CardContent className="p-3">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-8 h-8 bg-primary/10 rounded-md flex items-center justify-center text-sm">
+                <CardContent className="p-2">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-6 h-6 bg-primary/10 rounded-md flex items-center justify-center text-xs mb-1">
                       {getIconEmoji(tool.icon)}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-foreground group-hover:text-primary transition-colors text-sm truncate">
-                        {tool.name}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        {formatTimeAgo(tool.lastUsed)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="px-2 py-1 text-xs bg-secondary rounded-full">
+                    <h3 className="font-medium text-foreground group-hover:text-primary transition-colors text-xs truncate w-full">
+                      {tool.name}
+                    </h3>
+                    <span className="px-1 py-0.5 text-xs bg-secondary rounded text-muted-foreground mt-1">
                       {tool.category}
                     </span>
-                    <ArrowRight className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
                 </CardContent>
               </Card>
