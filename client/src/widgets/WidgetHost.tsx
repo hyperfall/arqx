@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
-import { WidgetProps, WidgetContext, getWidgetComponent } from './registry';
+import { WidgetProps, getWidgetComponent } from './registry';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useWidgetContext } from './WidgetContext';
 
 interface WidgetHostProps {
   widget: {
@@ -10,7 +11,6 @@ interface WidgetHostProps {
     bindings?: Record<string, string>;
     options?: Record<string, any>;
   };
-  context: WidgetContext;
 }
 
 function WidgetFallback({ title }: { title?: string }) {
@@ -39,8 +39,16 @@ function WidgetError({ error, title }: { error: string; title?: string }) {
   );
 }
 
-export default function WidgetHost({ widget, context }: WidgetHostProps) {
+export default function WidgetHost({ widget }: WidgetHostProps) {
+  const context = useWidgetContext();
   const WidgetComponent = getWidgetComponent(widget.type);
+
+  // Debug context
+  console.log('WidgetHost context:', { 
+    hasGetInput: !!context.getInput, 
+    contextKeys: Object.keys(context),
+    widgetType: widget.type 
+  });
 
   if (!WidgetComponent) {
     return <WidgetError error={`Unknown widget type: ${widget.type}`} title={widget.title} />;

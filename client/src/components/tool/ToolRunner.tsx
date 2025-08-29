@@ -293,7 +293,6 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
                   <WidgetHost
                     key={widgetId}
                     widget={widget}
-                    context={{} as any} // Context will be provided by provider
                   />
                 );
               })}
@@ -309,7 +308,6 @@ export default function ToolRunner({ toolSpec }: ToolRunnerProps) {
                     <WidgetHost
                       key={widgetId}
                       widget={widget}
-                      context={{} as any} // Context will be provided by provider
                     />
                   );
                 })}

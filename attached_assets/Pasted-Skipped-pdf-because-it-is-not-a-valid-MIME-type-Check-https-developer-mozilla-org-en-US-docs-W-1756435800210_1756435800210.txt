@@ -1,0 +1,54 @@
+Skipped ".pdf" because it is not a valid MIME type. Check https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types for a list of valid MIME types. 3 Console.js:61:15
+Uncaught TypeError: ctx.getInput is not a function
+    FileDetailsWidget FileDetailsWidget.tsx:7
+    React 12
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+FileDetailsWidget.tsx:7:20
+Uncaught TypeError: ctx.getInput is not a function
+    FileDetailsWidget FileDetailsWidget.tsx:7
+    React 13
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+FileDetailsWidget.tsx:7:20
+The above error occurred in the <FileDetailsWidget> component:
+
+FileDetailsWidget@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/src/widgets/panels/FileDetailsWidget.tsx:18:42
+div
+Suspense
+WidgetHost@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/src/widgets/WidgetHost.tsx:81:35
+div
+div
+div
+WidgetContextProvider@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/src/widgets/WidgetContext.tsx:20:38
+ToolRunner@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/src/components/tool/ToolRunner.tsx:31:35
+div
+Tool@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/src/pages/Tool.tsx:523:18
+Route@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=44afc80b:323:13
+Switch@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=44afc80b:379:14
+Router
+div
+main
+MainCard@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/src/components/layout/MainCard.tsx:20:33
+div
+div
+div
+AppLayout@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/src/App.tsx?v=S4pUnirWLLDRQWyz5BY51:82:3
+Provider@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=44afc80b:38:47
+TooltipProvider@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=44afc80b:69:7
+ThemeProvider@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/src/themes/ThemeProvider.tsx:30:30
+QueryClientProvider@https://23d2dd37-907b-4681-9a64-02f7fee8e30f-00-oyy08gmvk4b6.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=44afc80b:2804:27
+App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries. Console.js:61:15
+Uncaught TypeError: ctx.getInput is not a function
+    FileDetailsWidget FileDetailsWidget.tsx:7
+    React 10
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+FileDetailsWidget.tsx:7:20
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820. (Reason: CORS request did not succeed). Status code: (null).
