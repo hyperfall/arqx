@@ -79,7 +79,7 @@ export default function Composer({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full p-6 bg-card rounded-2xl text-foreground placeholder-muted-foreground resize-none transition-all duration-300 min-h-[120px] text-base leading-relaxed shadow-sm hover:shadow-md focus:shadow-xl focus:shadow-primary/20 focus:outline-none focus:ring-0 border-0"
+              className="w-full p-6 bg-background/80 backdrop-blur-sm border border-border/40 rounded-2xl text-foreground placeholder-muted-foreground resize-none transition-all duration-300 min-h-[120px] text-base leading-relaxed shadow-sm hover:shadow-md hover:border-border/60 focus:shadow-xl focus:shadow-primary/20 focus:border-primary/50 focus:outline-none focus:ring-0"
               rows={4}
               data-testid="main-composer"
             />
