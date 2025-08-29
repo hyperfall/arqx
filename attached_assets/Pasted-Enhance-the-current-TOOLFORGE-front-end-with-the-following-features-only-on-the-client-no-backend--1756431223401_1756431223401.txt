@@ -1,0 +1,91 @@
+Enhance the current TOOLFORGE front-end with the following features only on the client (no backend). Keep everything portable to Next.js later.
+
+STACK NOTES
+- React + TS + Tailwind + shadcn + React Router (existing)
+- Zustand + Zod (existing)
+- IndexedDB/localStorage for persistence
+- Keep Supabase optional; do not require it here
+
+────────────────────────────────────────────────
+A) TOOLSPEC UTILITIES
+────────────────────────────────────────────────
+1) Import/Export:
+   - Add “Import Tool” (supports drag-drop of .json anywhere in main card) and “Export Tool” (downloads current ToolSpec JSON).
+   - Validate with Zod; show inline errors.
+2) Local permalinks:
+   - Support route /t/local/:id. Save ToolSpecs to IndexedDB: key "toolforge.toolspecs".
+   - Add “Copy link” button that copies /t/local/:id.
+3) Undo/Redo:
+   - Maintain a bounded history (last 20) of ToolSpec diffs. Buttons in the Tool page header.
+
+────────────────────────────────────────────────
+B) RUN UX
+────────────────────────────────────────────────
+4) Run controls:
+   - Add Cancel and Restart beside the Run button.
+   - Progress shows % and ETA (“~12s”), and aria-live updates.
+5) File handling:
+   - Paste from clipboard (image/text/CSV) to auto-add as input.
+   - Drag & drop anywhere inside the main card (not just the dropzone).
+   - Batch list: drag-reorder, select all, clear all, per-file remove; show count/size caps and inline errors.
+6) Rename pattern helper:
+   - Text field `{name}_{index}.{ext}` with live preview of first 3 output names.
+
+────────────────────────────────────────────────
+C) CAPABILITIES & PREFETCH (STUBBED)
+────────────────────────────────────────────────
+7) Capability banner (read-only for now):
+   - Small callout on Tool page: “Runs locally • No server needed” OR “Server needed for large files” (just based on tool type and size caps; no network).
+   - Toggle “Local-only mode” in Settings that hides server-only hints.
+8) Service Worker prefetch (stub):
+   - Register a SW that caches wasm chunk placeholders (fake urls) when intent mentions “mp4/gif/pdf”.
+   - Expose a small badge “Modules prefetched” in the Tool footer (for demo).
+
+────────────────────────────────────────────────
+D) NAV/COMMANDS/ACCESSIBILITY
+────────────────────────────────────────────────
+9) Command Palette (⌘K/Ctrl+K):
+   - Actions: Navigate (Home, Gallery, Settings), Toggle theme, Open Recent tools (from IndexedDB), Paste from clipboard (shortcut).
+10) Keyboard cheatsheet:
+   - Overlay accessible from Settings and palette, listing: `/` focus, Enter submit, Shift+Enter newline, Esc blur, `[` toggle rail, ⌘K palette.
+11) i18n scaffold:
+   - Add a tiny i18n util (en only). All user-visible strings in components read from it.
+
+────────────────────────────────────────────────
+E) FEATURE FLAGS & TELEMETRY (CLIENT ONLY)
+────────────────────────────────────────────────
+12) Feature flags (with defaults):
+   - plannerLLM=false, serverFallback=false, supabaseOn=false.
+   - Put them in /src/config.ts and expose a small debug panel gated by ?debug=1.
+13) Telemetry stub:
+   - Log to console: TTFO, run success/failure, tool saved, import/export, palette usage.
+   - Create a thin `analytics.ts` with no external deps.
+
+────────────────────────────────────────────────
+F) PAGES & STATES POLISH
+────────────────────────────────────────────────
+14) Gallery:
+   - Persist last filters/sort in URL params and localStorage.
+   - “Load more” with skeleton shimmers; empty & error states.
+15) 404 & Error:
+   - Themed, friendly 404 page; error boundary page with retry.
+16) Performance:
+   - Lazy-load ToolRunner, GalleryGrid, CommandPalette.
+   - Reserve heights for skeletons to avoid CLS.
+   - Debounce all search inputs (250 ms).
+
+────────────────────────────────────────────────
+G) ACCEPTANCE
+────────────────────────────────────────────────
+✓ Import/export works; invalid JSON shows inline error.
+✓ /t/local/:id links load the tool; Copy link copies the right URL.
+✓ Undo/Redo updates ToolSpec and form without flicker.
+✓ Cancel/Restart changes progress state correctly; ETA displays.
+✓ Paste & drag-anywhere attach files; batch actions and reorder work; caps enforced with messages.
+✓ Rename pattern previews 3 filenames.
+✓ Capability banner appears with a sensible message and hides when “Local-only” enabled.
+✓ SW prefetch stub registers and shows a “prefetched” badge on matching intents.
+✓ Command palette navigates and runs actions; keyboard overlay accessible.
+✓ Gallery filters in URL; pagination with skeletons; empty/error states render.
+✓ 404 and error pages styled and reachable.
+✓ No horizontal overflows; bottom dock never covers content (dynamic padding).
