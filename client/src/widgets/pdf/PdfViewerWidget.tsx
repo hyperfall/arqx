@@ -42,7 +42,7 @@ export default function PdfViewerWidget({ id, title, bindings, options, ctx }: W
   
   const { document: pdfDoc, pages, isLoading, error } = usePdfDocument(pdfFile);
 
-  const totalPages = pages.length;
+  const totalPages = pdfDoc?.numPages || 0;
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -249,7 +249,7 @@ export default function PdfViewerWidget({ id, title, bindings, options, ctx }: W
           {showSidebar && options?.showThumbnails && (
             <div className="w-48 border-r bg-muted/20 overflow-y-auto">
               <div className="p-2 space-y-2">
-                {pages.map((pageData, index) => (
+                {Array.from({ length: totalPages }, (_, index) => (
                   <div
                     key={index}
                     className={`p-1 rounded cursor-pointer transition-colors ${
@@ -260,24 +260,7 @@ export default function PdfViewerWidget({ id, title, bindings, options, ctx }: W
                     onClick={() => setCurrentPage(index + 1)}
                   >
                     <div className="aspect-[3/4] bg-white rounded border flex items-center justify-center text-xs">
-                      {pageData ? (
-                        <canvas
-                          ref={(canvas) => {
-                            if (canvas && pageData) {
-                              const ctx = canvas.getContext('2d');
-                              if (ctx) {
-                                canvas.width = 120;
-                                canvas.height = 160;
-                                ctx.clearRect(0, 0, 120, 160);
-                                ctx.drawImage(pageData, 0, 0, 120, 160);
-                              }
-                            }
-                          }}
-                          className="w-full h-full"
-                        />
-                      ) : (
-                        `Page ${index + 1}`
-                      )}
+                      Page {index + 1}
                     </div>
                     <p className="text-xs text-center mt-1">{index + 1}</p>
                   </div>
@@ -293,7 +276,7 @@ export default function PdfViewerWidget({ id, title, bindings, options, ctx }: W
             style={{ height: '100%' }}
           >
             <div className="p-4 flex justify-center">
-              {pages[currentPage - 1] && (
+              {pdfDoc && (
                 <div 
                   className="bg-white shadow-lg rounded"
                   style={{
@@ -302,15 +285,26 @@ export default function PdfViewerWidget({ id, title, bindings, options, ctx }: W
                   }}
                 >
                   <canvas
-                    ref={(canvas) => {
-                      const pageData = pages[currentPage - 1];
-                      if (canvas && pageData) {
-                        const ctx = canvas.getContext('2d');
-                        if (ctx) {
-                          canvas.width = pageData.width;
-                          canvas.height = pageData.height;
-                          ctx.clearRect(0, 0, pageData.width, pageData.height);
-                          ctx.drawImage(pageData, 0, 0);
+                    ref={async (canvas) => {
+                      if (canvas && pdfDoc && currentPage <= totalPages) {
+                        try {
+                          const page = await pdfDoc.getPage(currentPage);
+                          const viewport = page.getViewport({ scale: 1.0 });
+                          const context = canvas.getContext('2d');
+                          
+                          if (context) {
+                            canvas.width = viewport.width;
+                            canvas.height = viewport.height;
+                            
+                            const renderContext = {
+                              canvasContext: context,
+                              viewport: viewport,
+                            };
+                            
+                            await page.render(renderContext).promise;
+                          }
+                        } catch (err) {
+                          console.warn(`Failed to render page ${currentPage}:`, err);
                         }
                       }
                     }}

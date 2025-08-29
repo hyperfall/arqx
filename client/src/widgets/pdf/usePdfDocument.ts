@@ -41,35 +41,10 @@ export function usePdfDocument(file: File | undefined): PdfDocumentHook {
 
         setDocument(pdfDoc);
 
-        // Pre-render pages for thumbnails and main view
+        // Create placeholder pages array to show correct page count
         const renderedPages: HTMLCanvasElement[] = [];
-        
-        for (let pageNum = 1; pageNum <= Math.min(pdfDoc.numPages, 20); pageNum++) {
-          if (cancelled) break;
-          
-          try {
-            const page = await pdfDoc.getPage(pageNum);
-            const viewport = page.getViewport({ scale: 1.0 });
-            
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            
-            if (!context) continue;
-            
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-
-            const renderContext = {
-              canvasContext: context,
-              viewport: viewport,
-              canvas: canvas,
-            };
-
-            await page.render(renderContext).promise;
-            renderedPages[pageNum - 1] = canvas;
-          } catch (pageError) {
-            console.warn(`Failed to render page ${pageNum}:`, pageError);
-          }
+        for (let i = 0; i < pdfDoc.numPages; i++) {
+          renderedPages[i] = document.createElement('canvas');
         }
 
         if (!cancelled) {
