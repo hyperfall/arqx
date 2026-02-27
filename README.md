@@ -1,8 +1,8 @@
-# TOOLFORGE
+# ARQX
 
-> Build and use powerful tools with natural language — describe what you want, and TOOLFORGE generates it instantly.
+> Build and use powerful tools with natural language — describe what you want, and Arqx generates it instantly.
 
-TOOLFORGE is a full-stack web application that lets users create, customize, and share file-processing tools by describing their functionality in plain English. It combines a FastLane pattern-matching engine, a browser-native capability registry, and a hybrid local/cloud storage architecture to deliver a privacy-first, offline-capable tool platform.
+Arqx is a full-stack web application that lets users create, customize, and share file-processing tools by describing their functionality in plain English. It combines a FastLane pattern-matching engine, a browser-native capability registry, and a hybrid local/cloud storage architecture to deliver a privacy-first, offline-capable tool platform.
 
 ---
 
@@ -157,8 +157,8 @@ arqx-main/
 ### Installation
 
 ```bash
-git clone https://github.com/your-org/toolforge.git
-cd toolforge
+git clone https://github.com/your-org/Arqx.git
+cd Arqx
 npm install
 ```
 
@@ -267,7 +267,7 @@ Drizzle ORM manages the PostgreSQL schema defined in `shared/schema.ts`:
 
 ### Storage & Sync
 
-TOOLFORGE uses a **CompositeRepo** pattern (`src/repositories/CompositeRepo.ts`) that abstracts over two storage backends:
+Arqx uses a **CompositeRepo** pattern (`src/repositories/CompositeRepo.ts`) that abstracts over two storage backends:
 
 ```
 CompositeRepo
@@ -409,7 +409,7 @@ All endpoints are under the `/api` prefix.
 
 ## Feature Flags
 
-Feature flags are managed by `FeatureFlagManager` in `src/config.ts`. They are persisted in `localStorage` under the key `toolforge-feature-flags`.
+Feature flags are managed by `FeatureFlagManager` in `src/config.ts`. They are persisted in `localStorage` under the key `Arqx-feature-flags`.
 
 ```typescript
 // Read current flags
@@ -466,4 +466,4 @@ Distributed under the **MIT License**. See `LICENSE` for details.
 
 ---
 
-*© 2024 TOOLFORGE. Built for makers and creators.*
+*© 2024 Arqx. Built for makers and creators.*
